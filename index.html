@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام تقييم المدرسين</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-control, .btn {
+            border-radius: 8px;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        canvas {
+            max-width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>نظام تقييم المدرسين</h1>
+
+        <!-- إضافة مادة -->
+        <div class="card">
+            <div class="card-body">
+                <h5>إضافة مادة</h5>
+                <input type="text" id="subjectName" class="form-control mb-2" placeholder="اسم المادة">
+                <button class="btn btn-primary" onclick="addSubject()">إضافة المادة</button>
+            </div>
+        </div>
+
+        <!-- إضافة طالب -->
+        <div class="card">
+            <div class="card-body">
+                <h5>إضافة طالب</h5>
+                <select id="subjectSelect" class="form-control mb-2"></select>
+                <input type="text" id="studentName" class="form-control mb-2" placeholder="اسم الطالب">
+                <button class="btn btn-primary" onclick="addStudent()">إضافة الطالب</button>
+            </div>
+        </div>
+
+        <!-- إضافة مهارة -->
+        <div class="card">
+            <div class="card-body">
+                <h5>إضافة مهارة</h5>
+                <select id="subjectSkillSelect" class="form-control mb-2"></select>
+                <input type="text" id="skillName" class="form-control mb-2" placeholder="اسم المهارة">
+                <button class="btn btn-primary" onclick="addSkill()">إضافة المهارة</button>
+            </div>
+        </div>
+
+        <!-- تقييم الطالب -->
+        <div class="card">
+            <div class="card-body">
+                <h5>تقييم الطالب</h5>
+                <select id="subjectEvalSelect" class="form-control mb-2"></select>
+                <select id="studentEvalSelect" class="form-control mb-2"></select>
+                <div id="skillsEval"></div>
+                <button class="btn btn-primary mt-2" onclick="saveEvaluation()">حفظ التقييم</button>
+            </div>
+        </div>
+
+        <!-- عرض تقدم الطالب -->
+        <div class="card">
+            <div class="card-body">
+                <h5>عرض تقدم الطالب</h5>
+                <select id="subjectProgressSelect" class="form-control mb-2"></select>
+                <select id="studentProgressSelect" class="form-control mb-2"></select>
+                <button class="btn btn-primary" onclick="showProgress()">عرض التقدم</button>
+                <canvas id="progressChart"></canvas>
+                <button class="btn btn-success mt-2" onclick="generatePDF()">إنشاء تقرير PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
