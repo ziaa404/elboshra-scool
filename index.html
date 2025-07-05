@@ -11,113 +11,73 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%);
+            background: #f4f7fa;
             font-family: 'Tajawal', sans-serif;
             min-height: 100vh;
             margin: 0;
-            transition: background 0.5s ease;
-        }
-        .dark-mode {
-            background: linear-gradient(135deg, #2c3e50 0%, #4b79a1 100%);
-            color: #e0e0e0;
-        }
-        .dark-mode .container {
-            background: #34495e;
-            color: #e0e0e0;
-        }
-        .dark-mode .card {
-            background: #3e5c76;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-        .dark-mode .form-control {
-            background: #2c3e50;
-            color: #fff;
-            border-color: #4b79a1;
-        }
-        .dark-mode .alert-success {
-            background: #27ae60;
-            color: #fff;
-        }
-        .dark-mode .alert-danger {
-            background: #c0392b;
-            color: #fff;
         }
         .container {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            max-width: 1000px;
-            margin: 40px auto;
-            position: relative;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 20px auto;
         }
         h1 {
             color: #1a237e;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h5 {
+            color: #34495e;
+            margin-bottom: 15px;
         }
         .form-control, .btn {
-            border-radius: 12px;
-            transition: all 0.3s ease;
+            border-radius: 8px;
         }
         .form-control:focus {
-            box-shadow: 0 0 12px rgba(52, 152, 219, 0.4);
             border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
         }
         .btn-primary {
             background: #3498db;
             border: none;
-            padding: 10px 20px;
-            font-weight: 500;
         }
         .btn-primary:hover {
             background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         .btn-success {
             background: #27ae60;
         }
         .btn-success:hover {
             background: #219653;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         .btn-danger {
             background: #c0392b;
         }
         .btn-danger:hover {
             background: #a93226;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         .card {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
             background: #f9fafb;
-            transition: transform 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
         }
         .card-body {
-            padding: 30px;
+            padding: 20px;
         }
         canvas {
             max-width: 100%;
-            margin: 20px auto;
+            margin: 15px auto;
             background: #fff;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 10px;
         }
         .alert {
-            margin-top: 15px;
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -126,29 +86,33 @@
             font-size: 1.2rem;
         }
         .skills-container {
-            margin-top: 20px;
+            margin-top: 15px;
         }
         .skill-input {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
         label {
-            font-weight: 500;
-            color: #2c3e50;
+            color: #34495e;
             min-width: 100px;
         }
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #3498db;
+        .evaluations-table {
+            margin-top: 15px;
         }
-        .theme-toggle:hover {
-            color: #2980b9;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #3498db;
+            color: white;
         }
         .loading {
             position: fixed;
@@ -166,42 +130,21 @@
             border: 4px solid #f3f3f3;
             border-top: 4px solid #3498db;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .evaluations-table {
-            margin-top: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th, td {
-            padding: 10px;
-            text-align: right;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background: #3498db;
-            color: white;
-        }
         @media (max-width: 576px) {
             .container {
-                padding: 20px;
-                margin: 20px;
+                padding: 15px;
+                margin: 15px;
             }
             h1 {
-                font-size: 1.6rem;
-            }
-            .btn {
-                padding: 8px 15px;
-                font-size: 0.9rem;
+                font-size: 1.5rem;
             }
             label {
                 min-width: 80px;
@@ -212,7 +155,6 @@
 </head>
 <body>
     <div class="container">
-        <i class="fas fa-moon theme-toggle" id="themeToggle" title="تبديل الوضع"></i>
         <h1>نظام تقييم المدرسين</h1>
 
         <!-- Alert for user feedback -->
@@ -258,9 +200,22 @@
                 <input type="text" id="skillName" class="form-control mb-3" placeholder="اسم المهارة" aria-label="اسم المهارة">
                 <div class="d-flex gap-2">
                     <button class="btn btn-primary" onclick="addSkill()">إضافة المهارة</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('skillName').value = ''; document.getElementById('subjectSkillSelect').value = ''">респ
+                    <button class="btn btn-secondary" onclick="document.getElementById('skillName').value = ''; document.getElementById('subjectSkillSelect').value = ''">مسح</button>
+                </div>
+            </div>
+        </div>
 
-                <button class="btn btn-secondary" onclick="document.getElementById('skillName').value = ''; document.getElementById('subjectSkillSelect').value = ''">مسح</button>
+        <!-- إضافة تحضير -->
+        <div class="card">
+            <div class="card-body">
+                <h5><i class="fas fa-clipboard me-2"></i>إضافة تحضير</h5>
+                <select id="subjectPrepSelect" class="form-control mb-3" aria-label="اختر المادة"></select>
+                <input type="text" id="prepTopic" class="form-control mb-3" placeholder="موضوع التحضير" aria-label="موضوع التحضير">
+                <textarea id="prepNotes" class="form-control mb-3" placeholder="ملاحظات التحضير" aria-label="ملاحظات التحضير"></textarea>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="addPreparation()">إضافة التحضير</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('prepTopic').value = ''; document.getElementById('prepNotes').value = ''; document.getElementById('subjectPrepSelect').value = ''">مسح</button>
+                </div>
             </div>
         </div>
 
@@ -270,10 +225,14 @@
                 <h5><i class="fas fa-edit me-2"></i>تقييم الطالب</h5>
                 <select id="subjectEvalSelect" class="form-control mb-3" aria-label="اختر المادة"></select>
                 <select id="studentEvalSelect" class="form-control mb-3" aria-label="اختر الطالب"></select>
+                <select id="evalType" class="form-control mb-3" aria-label="نوع التقييم">
+                    <option value="numeric">درجات (0-100)</option>
+                    <option value="mastery">أتقن / لم يتقن</option>
+                </select>
                 <div id="skillsEval" class="skills-container"></div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-primary mt-2" onclick="saveEvaluation()">حفظ التقييم</button>
-                    <button class="btn btn-secondary mt-2" onclick="document.querySelectorAll('#skillsEval input').forEach(input => input.value = ''); document.getElementById('subjectEvalSelect').value = ''; document.getElementById('studentEvalSelect').value = ''">مسح</button>
+                    <button class="btn btn-secondary mt-2" onclick="document.querySelectorAll('#skillsEval input, #skillsEval select').forEach(el => el.value = ''); document.getElementById('subjectEvalSelect').value = ''; document.getElementById('studentEvalSelect').value = ''; document.getElementById('evalType').value = 'numeric'">مسح</button>
                 </div>
             </div>
         </div>
@@ -319,12 +278,13 @@
         let students = JSON.parse(localStorage.getItem('students')) || [];
         let skills = JSON.parse(localStorage.getItem('skills')) || [];
         let evaluations = JSON.parse(localStorage.getItem('evaluations')) || [];
+        let preparations = JSON.parse(localStorage.getItem('preparations')) || [];
         let chart = null;
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', () => {
             updateAllSelects();
-            loadTheme();
+            document.getElementById('evalType').addEventListener('change', updateSkillsEval);
         });
 
         // Show alert message
@@ -343,6 +303,7 @@
             updateSelect('subjectSelect');
             updateSelect('subjectSkillSelect');
             updateSelect('subjectEvalSelect');
+            updateSelect('subjectPrepSelect');
             updateSelect('subjectProgressSelect');
             updateStudentSelect();
         }
@@ -441,18 +402,46 @@
             showAlert('تم إضافة المهارة بنجاح');
         }
 
+        // Add preparation
+        function addPreparation() {
+            const subjectId = document.getElementById('subjectPrepSelect').value;
+            const topic = document.getElementById('prepTopic').value.trim();
+            const notes = document.getElementById('prepNotes').value.trim();
+            if (!subjectId || !topic) {
+                showAlert('يرجى اختيار المادة وإدخال موضوع التحضير', 'danger');
+                return;
+            }
+            const preparation = { id: Date.now().toString(), subjectId, topic, notes, timestamp: new Date().toLocaleString('ar-EG') };
+            preparations.push(preparation);
+            localStorage.setItem('preparations', JSON.stringify(preparations));
+            document.getElementById('prepTopic').value = '';
+            document.getElementById('prepNotes').value = '';
+            showAlert('تم إضافة التحضير بنجاح');
+        }
+
         // Update evaluation skills
         function updateSkillsEval() {
             const subjectId = document.getElementById('subjectEvalSelect').value;
+            const evalType = document.getElementById('evalType').value;
             const skillsEval = document.getElementById('skillsEval');
             skillsEval.innerHTML = '';
             skills.filter(skill => skill.subjectId === subjectId).forEach(skill => {
                 const div = document.createElement('div');
                 div.className = 'skill-input';
-                div.innerHTML = `
-                    <label>${skill.name}</label>
-                    <input type="number" class="form-control" data-skill-id="${skill.id}" min="0" max="100" placeholder="أدخل درجة (0-100)" aria-label="درجة ${skill.name}">
-                `;
+                if (evalType === 'numeric') {
+                    div.innerHTML = `
+                        <label>${skill.name}</label>
+                        <input type="number" class="form-control" data-skill-id="${skill.id}" min="0" max="100" placeholder="أدخل درجة (0-100)" aria-label="درجة ${skill.name}">
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <label>${skill.name}</label>
+                        <select class="form-control" data-skill-id="${skill.id}" aria-label="تقييم ${skill.name}">
+                            <option value="mastered">أتقن</option>
+                            <option value="not_mastered">لم يتقن</option>
+                        </select>
+                    `;
+                }
                 skillsEval.appendChild(div);
             });
         }
@@ -461,11 +450,12 @@
         function saveEvaluation() {
             const subjectId = document.getElementById('subjectEvalSelect').value;
             const studentId = document.getElementById('studentEvalSelect').value;
+            const evalType = document.getElementById('evalType').value;
             if (!subjectId || !studentId) {
                 showAlert('يرجى اختيار المادة والطالب', 'danger');
                 return;
             }
-            const skillInputs = document.querySelectorAll('#skillsEval input');
+            const skillInputs = document.querySelectorAll('#skillsEval input, #skillsEval select');
             if (skillInputs.length === 0) {
                 showAlert('لا توجد مهارات لتقييمها في هذه المادة', 'danger');
                 return;
@@ -474,19 +464,24 @@
                 id: Date.now().toString(),
                 subjectId,
                 studentId,
+                evalType,
                 scores: {},
                 timestamp: new Date().toLocaleString('ar-EG')
             };
             let valid = true;
             skillInputs.forEach(input => {
                 const skillId = input.dataset.skillId;
-                const score = parseInt(input.value);
-                if (isNaN(score) || score < 0 || score > 100) {
-                    showAlert('يرجى إدخال درجات صحيحة (0-100) لجميع المهارات', 'danger');
-                    valid = false;
-                    return;
+                if (evalType === 'numeric') {
+                    const score = parseInt(input.value);
+                    if (isNaN(score) || score < 0 || score > 100) {
+                        showAlert('يرجى إدخال درجات صحيحة (0-100) لجميع المهارات', 'danger');
+                        valid = false;
+                        return;
+                    }
+                    evaluation.scores[skillId] = score;
+                } else {
+                    evaluation.scores[skillId] = input.value;
                 }
-                evaluation.scores[skillId] = score;
             });
             if (!valid) return;
             if (confirm('هل أنت متأكد من حفظ التقييم؟')) {
@@ -495,6 +490,8 @@
                 skillInputs.forEach(input => input.value = '');
                 document.getElementById('subjectEvalSelect').value = '';
                 document.getElementById('studentEvalSelect').value = '';
+                document.getElementById('evalType').value = 'numeric';
+                updateSkillsEval();
                 updateEvaluationsTable();
                 showAlert('تم حفظ التقييم بنجاح');
             }
@@ -515,24 +512,32 @@
                 return;
             }
             const labels = subjectSkills.map(skill => skill.name);
-            const data = subjectSkills.map(skill => {
-                const scores = studentEvals.map(eval => eval.scores[skill.id] || 0);
-                return scores.length ? (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(2) : 0;
-            });
+            let data, chartType = 'bar';
+            if (studentEvals.some(eval => eval.evalType === 'mastery')) {
+                chartType = 'bar';
+                data = subjectSkills.map(skill => {
+                    const scores = studentEvals.filter(eval => eval.evalType === 'mastery').map(eval => eval.scores[skill.id] === 'mastered' ? 1 : 0);
+                    return scores.length ? (scores.reduce((sum, score) => sum + score, 0) / scores.length * 100).toFixed(2) : 0;
+                });
+            } else {
+                data = subjectSkills.map(skill => {
+                    const scores = studentEvals.filter(eval => eval.evalType === 'numeric').map(eval => eval.scores[skill.id] || 0);
+                    return scores.length ? (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(2) : 0;
+                });
+            }
 
             const ctx = document.getElementById('progressChart').getContext('2d');
             if (chart) chart.destroy();
             chart = new Chart(ctx, {
-                type: 'bar',
+                type: chartType,
                 data: {
                     labels,
                     datasets: [{
-                        label: 'متوسط الدرجات',
+                        label: studentEvals.some(eval => eval.evalType === 'mastery') ? 'نسبة الإتقان (%)' : 'متوسط الدرجات',
                         data,
-                        backgroundColor: labels.map((_, i) => `hsl(${i * 30}, 70%, 60%)`),
-                        borderColor: labels.map((_, i) => `hsl(${i * 30}, 70%, 50%)`),
-                        borderWidth: 1,
-                        hoverBackgroundColor: labels.map((_, i) => `hsl(${i * 30}, 70%, 70%)`)
+                        backgroundColor: '#3498db',
+                        borderColor: '#2980b9',
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -541,13 +546,13 @@
                         y: {
                             beginAtZero: true,
                             max: 100,
-                            title: { display: true, text: 'الدرجة', font: { size: 14 } }
+                            title: { display: true, text: studentEvals.some(eval => eval.evalType === 'mastery') ? 'نسبة الإتقان' : 'الدرجة' }
                         },
-                        x: { title: { display: true, text: 'المهارات', font: { size: 14 } } }
+                        x: { title: { display: true, text: 'المهارات' } }
                     },
                     plugins: {
                         legend: { display: true, position: 'top' },
-                        title: { display: true, text: 'تقدم الطالب', font: { size: 16 } }
+                        title: { display: true, text: 'تقدم الطالب' }
                     }
                 }
             });
@@ -565,7 +570,7 @@
                 const row = document.createElement('tr');
                 const skillsText = Object.entries(eval.scores).map(([skillId, score]) => {
                     const skill = skills.find(s => s.id === skillId);
-                    return `${skill.name}: ${score}`;
+                    return `${skill.name}: ${eval.evalType === 'numeric' ? score : score === 'mastered' ? 'أتقن' : 'لم يتقن'}`;
                 }).join(', ');
                 row.innerHTML = `
                     <td>${eval.timestamp}</td>
@@ -592,45 +597,66 @@
             const student = students.find(s => s.id === studentId);
             const studentEvals = evaluations.filter(eval => eval.subjectId === subjectId && eval.studentId === studentId);
             const subjectSkills = skills.filter(skill => skill.subjectId === subjectId);
+            const subjectPreps = preparations.filter(prep => prep.subjectId === subjectId);
 
             // PDF Header
             doc.setFont('Amiri', 'normal');
-            doc.setFontSize(18);
+            doc.setFontSize(16);
             doc.setTextColor(40, 116, 166);
             doc.text('تقرير تقدم الطالب', 105, 15, { align: 'center' });
-            doc.setFontSize(14);
+            doc.setFontSize(12);
             doc.setTextColor(0);
             doc.text(`الطالب: ${student.name}`, 190, 25, { align: 'right' });
             doc.text(`المادة: ${subject.name}`, 190, 35, { align: 'right' });
             doc.text(`التاريخ: ${new Date().toLocaleString('ar-EG')}`, 190, 45, { align: 'right' });
 
             // Skills Table
-            doc.setFontSize(12);
-            let y = 60;
-            doc.setFillColor(240, 244, 248);
-            doc.rect(10, y - 5, 190, 10, 'F');
-            doc.setTextColor(40, 116, 166);
-            doc.text('المهارة', 150, y);
-            doc.text('متوسط الدرجة', 30, y);
-            doc.setTextColor(0);
-            y += 10;
-            doc.setLineWidth(0.5);
-            doc.line(10, y - 5, 200, y - 5);
-            subjectSkills.forEach(skill => {
-                const scores = studentEvals.map(eval => eval.scores[skill.id] || 0);
-                const avg = scores.length ? (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(2) : 0;
-                doc.text(skill.name, 190, y, { align: 'right' });
-                doc.text(`${avg}`, 30, y);
+            let y = 55;
+            if (subjectSkills.length > 0) {
+                doc.text('المهارات ومتوسط الدرجات:', 190, y, { align: 'right' });
                 y += 10;
+                doc.setFillColor(230, 230, 230);
+                doc.rect(10, y - 5, 190, 8, 'F');
+                doc.text('المهارة', 150, y, { align: 'right' });
+                doc.text(studentEvals.some(eval => eval.evalType === 'mastery') ? 'الإتقان' : 'متوسط الدرجة', 30, y);
+                y += 10;
+                doc.setLineWidth(0.2);
                 doc.line(10, y - 5, 200, y - 5);
-            });
+                subjectSkills.forEach(skill => {
+                    const scores = studentEvals.map(eval => eval.scores[skill.id] || (eval.evalType === 'mastery' ? 'not_mastered' : 0));
+                    let avg;
+                    if (studentEvals.some(eval => eval.evalType === 'mastery')) {
+                        const masteredCount = scores.filter(score => score === 'mastered').length;
+                        avg = scores.length ? `${(masteredCount / scores.length * 100).toFixed(2)}% أتقن` : '0% أتقن';
+                    } else {
+                        avg = scores.length ? (scores.reduce((sum, score) => sum + (typeof score === 'number' ? score : 0), 0) / scores.length).toFixed(2) : 0;
+                    }
+                    doc.text(skill.name, 190, y, { align: 'right' });
+                    doc.text(`${avg}`, 30, y);
+                    y += 10;
+                    doc.line(10, y - 5, 200, y - 5);
+                });
+            }
 
-            // Add Chart to PDF
-            if (chart) {
+            // Preparations
+            if (subjectPreps.length > 0) {
+                y += 10;
+                doc.text('خطط التحضير:', 190, y, { align: 'right' });
+                y += 10;
+                subjectPreps.forEach(prep => {
+                    doc.text(`- ${prep.topic}: ${prep.notes || 'لا توجد ملاحظات'} (${prep.timestamp})`, 190, y, { align: 'right' });
+                    y += 10;
+                });
+            }
+
+            // Add Chart
+            if (chart && subjectSkills.length > 0) {
+                y += 10;
+                doc.text('رسم بياني للتقدم:', 190, y, { align: 'right' });
                 const canvas = document.getElementById('progressChart');
-                const chartImage = await html2canvas(canvas);
+                const chartImage = await html2canvas(canvas, { scale: 2 });
                 const imgData = chartImage.toDataURL('image/png');
-                doc.addImage(imgData, 'PNG', 10, y + 10, 190, 100);
+                doc.addImage(imgData, 'PNG', 10, y + 5, 190, 80);
             }
 
             // Save PDF
@@ -646,10 +672,12 @@
                 students = [];
                 skills = [];
                 evaluations = [];
+                preparations = [];
                 localStorage.removeItem('subjects');
                 localStorage.removeItem('students');
                 localStorage.removeItem('skills');
                 localStorage.removeItem('evaluations');
+                localStorage.removeItem('preparations');
                 updateAllSelects();
                 updateEvaluationsTable();
                 if (chart) chart.destroy();
@@ -658,24 +686,7 @@
             }
         }
 
-        // Theme toggle
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
-            localStorage.setItem('theme', theme);
-            document.getElementById('themeToggle').className = `fas fa-${theme === 'dark' ? 'sun' : 'moon'} theme-toggle`;
-        }
-
-        function loadTheme() {
-            const theme = localStorage.getItem('theme') || 'light';
-            if (theme === 'dark') {
-                document.body.classList.add('dark-mode');
-                document.getElementById('themeToggle').className = 'fas fa-sun theme-toggle';
-            }
-        }
-
         // Event listeners
-        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
         document.getElementById('subjectEvalSelect').addEventListener('change', updateStudentSelect);
         document.getElementById('subjectProgressSelect').addEventListener('change', updateStudentSelect);
     </script>
