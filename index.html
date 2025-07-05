@@ -7,123 +7,308 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background-color: #f0f4f8;
+            background: linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%);
             font-family: 'Tajawal', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            transition: background 0.5s ease;
+        }
+        .dark-mode {
+            background: linear-gradient(135deg, #2c3e50 0%, #4b79a1 100%);
+            color: #e0e0e0;
+        }
+        .dark-mode .container {
+            background: #34495e;
+            color: #e0e0e0;
+        }
+        .dark-mode .card {
+            background: #3e5c76;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .dark-mode .form-control {
+            background: #2c3e50;
+            color: #fff;
+            border-color: #4b79a1;
+        }
+        .dark-mode .alert-success {
+            background: #27ae60;
+            color: #fff;
+        }
+        .dark-mode .alert-danger {
+            background: #c0392b;
+            color: #fff;
         }
         .container {
             background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            margin: 20px auto;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            max-width: 1000px;
+            margin: 40px auto;
+            position: relative;
         }
         h1 {
-            color: #2c3e50;
+            color: #1a237e;
             text-align: center;
             margin-bottom: 30px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .form-control, .btn {
-            border-radius: 8px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 12px rgba(52, 152, 219, 0.4);
+            border-color: #3498db;
         }
         .btn-primary {
-            background-color: #3498db;
+            background: #3498db;
             border: none;
+            padding: 10px 20px;
+            font-weight: 500;
         }
         .btn-primary:hover {
-            background-color: #2980b9;
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         .btn-success {
-            background-color: #27ae60;
+            background: #27ae60;
         }
         .btn-success:hover {
-            background-color: #219653;
+            background: #219653;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-danger {
+            background: #c0392b;
+        }
+        .btn-danger:hover {
+            background: #a93226;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         .card {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: #f9fafb;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-body {
+            padding: 30px;
         }
         canvas {
             max-width: 100%;
-            margin-top: 20px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         .alert {
-            margin-top: 10px;
+            margin-top: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .alert i {
+            font-size: 1.2rem;
         }
         .skills-container {
-            margin-top: 15px;
+            margin-top: 20px;
         }
         .skill-input {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        label {
+            font-weight: 500;
+            color: #2c3e50;
+            min-width: 100px;
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #3498db;
+        }
+        .theme-toggle:hover {
+            color: #2980b9;
+        }
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .evaluations-table {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #3498db;
+            color: white;
         }
         @media (max-width: 576px) {
             .container {
-                padding: 15px;
+                padding: 20px;
+                margin: 20px;
             }
             h1 {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
+            }
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            label {
+                min-width: 80px;
             }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container">
+        <i class="fas fa-moon theme-toggle" id="themeToggle" title="تبديل الوضع"></i>
         <h1>نظام تقييم المدرسين</h1>
 
         <!-- Alert for user feedback -->
-        <div id="alert" class="alert d-none" role="alert"></div>
+        <div id="alert" class="alert d-none" role="alert">
+            <i class="fas"></i> <span></span>
+        </div>
+
+        <!-- Loading spinner -->
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+        </div>
 
         <!-- إضافة مادة -->
         <div class="card">
             <div class="card-body">
-                <h5>إضافة مادة</h5>
-                <input type="text" id="subjectName" class="form-control mb-2" placeholder="اسم المادة" aria-label="اسم المادة">
-                <button class="btn btn-primary" onclick="addSubject()">إضافة المادة</button>
+                <h5><i class="fas fa-book me-2"></i>إضافة مادة</h5>
+                <input type="text" id="subjectName" class="form-control mb-3" placeholder="اسم المادة" aria-label="اسم المادة">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="addSubject()">إضافة المادة</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('subjectName').value = ''">مسح</button>
+                </div>
             </div>
         </div>
 
         <!-- إضافة طالب -->
         <div class="card">
             <div class="card-body">
-                <h5>إضافة طالب</h5>
-                <select id="subjectSelect" class="form-control mb-2" aria-label="اختر المادة"></select>
-                <input type="text" id="studentName" class="form-control mb-2" placeholder="اسم الطالب" aria-label="اسم الطالب">
-                <button class="btn btn-primary" onclick="addStudent()">إضافة الطالب</button>
+                <h5><i class="fas fa-user-graduate me-2"></i>إضافة طالب</h5>
+                <select id="subjectSelect" class="form-control mb-3" aria-label="اختر المادة"></select>
+                <input type="text" id="studentName" class="form-control mb-3" placeholder="اسم الطالب" aria-label="اسم الطالب">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="addStudent()">إضافة الطالب</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('studentName').value = ''; document.getElementById('subjectSelect').value = ''">مسح</button>
+                </div>
             </div>
         </div>
 
         <!-- إضافة مهارة -->
         <div class="card">
             <div class="card-body">
-                <h5>إضافة مهارة</h5>
-                <select id="subjectSkillSelect" class="form-control mb-2" aria-label="اختر المادة"></select>
-                <input type="text" id="skillName" class="form-control mb-2" placeholder="اسم المهارة" aria-label="اسم المهارة">
-                <button class="btn btn-primary" onclick="addSkill()">إضافة المهارة</button>
+                <h5><i class="fas fa-star me-2"></i>إضافة مهارة</h5>
+                <select id="subjectSkillSelect" class="form-control mb-3" aria-label="اختر المادة"></select>
+                <input type="text" id="skillName" class="form-control mb-3" placeholder="اسم المهارة" aria-label="اسم المهارة">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="addSkill()">إضافة المهارة</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('skillName').value = ''; document.getElementById('subjectSkillSelect').value = ''">респ
+
+                <button class="btn btn-secondary" onclick="document.getElementById('skillName').value = ''; document.getElementById('subjectSkillSelect').value = ''">مسح</button>
             </div>
         </div>
 
         <!-- تقييم الطالب -->
         <div class="card">
             <div class="card-body">
-                <h5>تقييم الطالب</h5>
-                <select id="subjectEvalSelect" class="form-control mb-2" aria-label="اختر المادة"></select>
-                <select id="studentEvalSelect" class="form-control mb-2" aria-label="اختر الطالب"></select>
+                <h5><i class="fas fa-edit me-2"></i>تقييم الطالب</h5>
+                <select id="subjectEvalSelect" class="form-control mb-3" aria-label="اختر المادة"></select>
+                <select id="studentEvalSelect" class="form-control mb-3" aria-label="اختر الطالب"></select>
                 <div id="skillsEval" class="skills-container"></div>
-                <button class="btn btn-primary mt-2" onclick="saveEvaluation()">حفظ التقييم</button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary mt-2" onclick="saveEvaluation()">حفظ التقييم</button>
+                    <button class="btn btn-secondary mt-2" onclick="document.querySelectorAll('#skillsEval input').forEach(input => input.value = ''); document.getElementById('subjectEvalSelect').value = ''; document.getElementById('studentEvalSelect').value = ''">مسح</button>
+                </div>
             </div>
         </div>
 
         <!-- عرض تقدم الطالب -->
         <div class="card">
             <div class="card-body">
-                <h5>عرض تقدم الطالب</h5>
-                <select id="subjectProgressSelect" class="form-control mb-2" aria-label="اختر المادة"></select>
-                <select id="studentProgressSelect" class="form-control mb2" aria-label="اختر الطالب"></select>
-                <button class="btn btn-primary" onclick="showProgress()">عرض التقدم</button>
+                <h5><i class="fas fa-chart-bar me-2"></i>عرض تقدم الطالب</h5>
+                <select id="subjectProgressSelect" class="form-control mb-3" aria-label="اختر المادة"></select>
+                <select id="studentProgressSelect" class="form-control mb-3" aria-label="اختر الطالب"></select>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="showProgress()">عرض التقدم</button>
+                    <button class="btn btn-success" onclick="generatePDF()">إنشاء تقرير PDF</button>
+                </div>
                 <canvas id="progressChart"></canvas>
-                <button class="btn btn-success mt-2" onclick="generatePDF()">إنشاء تقرير PDF</button>
+                <div class="evaluations-table">
+                    <h6>التقييمات السابقة</h6>
+                    <table id="evaluationsTable" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>المهارات</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- مسح البيانات -->
+        <div class="card">
+            <div class="card-body">
+                <h5><i class="fas fa-trash-alt me-2"></i>إدارة البيانات</h5>
+                <button class="btn btn-danger" onclick="clearData()">مسح جميع البيانات</button>
             </div>
         </div>
     </div>
@@ -139,13 +324,17 @@
         // Initialize the page
         document.addEventListener('DOMContentLoaded', () => {
             updateAllSelects();
+            loadTheme();
         });
 
         // Show alert message
         function showAlert(message, type = 'success') {
             const alert = document.getElementById('alert');
-            alert.textContent = message;
+            const icon = alert.querySelector('i');
+            const text = alert.querySelector('span');
+            text.textContent = message;
             alert.className = `alert alert-${type} d-block`;
+            icon.className = `fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`;
             setTimeout(() => alert.className = 'alert d-none', 3000);
         }
 
@@ -187,7 +376,10 @@
                 studentProgressSelect.appendChild(option);
             });
 
-            if (subjectId) updateSkillsEval();
+            if (subjectId) {
+                updateSkillsEval();
+                updateEvaluationsTable();
+            }
         }
 
         // Add a subject
@@ -197,7 +389,7 @@
                 showAlert('يرجى إدخال اسم المادة', 'danger');
                 return;
             }
-            if (subjects.some(subject => subject.name === subjectName)) {
+            if (subjects.some(subject => subject.name.toLowerCase() === subjectName.toLowerCase())) {
                 showAlert('المادة موجودة بالفعل', 'danger');
                 return;
             }
@@ -217,7 +409,7 @@
                 showAlert('يرجى اختيار المادة وإدخال اسم الطالب', 'danger');
                 return;
             }
-            if (students.some(student => student.name === studentName && student.subjectId === subjectId)) {
+            if (students.some(student => student.name.toLowerCase() === studentName.toLowerCase() && student.subjectId === subjectId)) {
                 showAlert('الطالب موجود بالفعل في هذه المادة', 'danger');
                 return;
             }
@@ -237,7 +429,7 @@
                 showAlert('يرجى اختيار المادة وإدخال اسم المهارة', 'danger');
                 return;
             }
-            if (skills.some(skill => skill.name === skillName && skill.subjectId === subjectId)) {
+            if (skills.some(skill => skill.name.toLowerCase() === skillName.toLowerCase() && skill.subjectId === subjectId)) {
                 showAlert('المهارة موجودة بالفعل في هذه المادة', 'danger');
                 return;
             }
@@ -259,7 +451,7 @@
                 div.className = 'skill-input';
                 div.innerHTML = `
                     <label>${skill.name}</label>
-                    <input type="number" class="form-control" data-skill-id="${skill.id}" min="0" max="100" placeholder="أدخل درجة (0-100)">
+                    <input type="number" class="form-control" data-skill-id="${skill.id}" min="0" max="100" placeholder="أدخل درجة (0-100)" aria-label="درجة ${skill.name}">
                 `;
                 skillsEval.appendChild(div);
             });
@@ -274,29 +466,38 @@
                 return;
             }
             const skillInputs = document.querySelectorAll('#skillsEval input');
+            if (skillInputs.length === 0) {
+                showAlert('لا توجد مهارات لتقييمها في هذه المادة', 'danger');
+                return;
+            }
             const evaluation = {
                 id: Date.now().toString(),
                 subjectId,
                 studentId,
                 scores: {},
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toLocaleString('ar-EG')
             };
             let valid = true;
             skillInputs.forEach(input => {
                 const skillId = input.dataset.skillId;
                 const score = parseInt(input.value);
                 if (isNaN(score) || score < 0 || score > 100) {
-                    showAlert('يرجى إدخال درجات صحيحة (0-100)', 'danger');
+                    showAlert('يرجى إدخال درجات صحيحة (0-100) لجميع المهارات', 'danger');
                     valid = false;
                     return;
                 }
                 evaluation.scores[skillId] = score;
             });
             if (!valid) return;
-            evaluations.push(evaluation);
-            localStorage.setItem('evaluations', JSON.stringify(evaluations));
-            skillInputs.forEach(input => input.value = '');
-            showAlert('تم حفظ التقييم بنجاح');
+            if (confirm('هل أنت متأكد من حفظ التقييم؟')) {
+                evaluations.push(evaluation);
+                localStorage.setItem('evaluations', JSON.stringify(evaluations));
+                skillInputs.forEach(input => input.value = '');
+                document.getElementById('subjectEvalSelect').value = '';
+                document.getElementById('studentEvalSelect').value = '';
+                updateEvaluationsTable();
+                showAlert('تم حفظ التقييم بنجاح');
+            }
         }
 
         // Show progress chart
@@ -309,6 +510,10 @@
             }
             const studentEvals = evaluations.filter(eval => eval.subjectId === subjectId && eval.studentId === studentId);
             const subjectSkills = skills.filter(skill => skill.subjectId === subjectId);
+            if (subjectSkills.length === 0) {
+                showAlert('لا توجد مهارات لهذه المادة', 'danger');
+                return;
+            }
             const labels = subjectSkills.map(skill => skill.name);
             const data = subjectSkills.map(skill => {
                 const scores = studentEvals.map(eval => eval.scores[skill.id] || 0);
@@ -324,28 +529,63 @@
                     datasets: [{
                         label: 'متوسط الدرجات',
                         data,
-                        backgroundColor: 'rgba(52, 152, 219, 0.5)',
-                        borderColor: 'rgba(52, 152, 219, 1)',
-                        borderWidth: 1
+                        backgroundColor: labels.map((_, i) => `hsl(${i * 30}, 70%, 60%)`),
+                        borderColor: labels.map((_, i) => `hsl(${i * 30}, 70%, 50%)`),
+                        borderWidth: 1,
+                        hoverBackgroundColor: labels.map((_, i) => `hsl(${i * 30}, 70%, 70%)`)
                     }]
                 },
                 options: {
                     responsive: true,
                     scales: {
-                        y: { beginAtZero: true, max: 100 }
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'الدرجة', font: { size: 14 } }
+                        },
+                        x: { title: { display: true, text: 'المهارات', font: { size: 14 } } }
+                    },
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        title: { display: true, text: 'تقدم الطالب', font: { size: 16 } }
                     }
                 }
+            });
+            updateEvaluationsTable();
+        }
+
+        // Update evaluations table
+        function updateEvaluationsTable() {
+            const subjectId = document.getElementById('subjectProgressSelect').value;
+            const studentId = document.getElementById('studentProgressSelect').value;
+            const tableBody = document.querySelector('#evaluationsTable tbody');
+            tableBody.innerHTML = '';
+            const studentEvals = evaluations.filter(eval => eval.subjectId === subjectId && eval.studentId === studentId);
+            studentEvals.forEach(eval => {
+                const row = document.createElement('tr');
+                const skillsText = Object.entries(eval.scores).map(([skillId, score]) => {
+                    const skill = skills.find(s => s.id === skillId);
+                    return `${skill.name}: ${score}`;
+                }).join(', ');
+                row.innerHTML = `
+                    <td>${eval.timestamp}</td>
+                    <td>${skillsText}</td>
+                `;
+                tableBody.appendChild(row);
             });
         }
 
         // Generate PDF report
-        function generatePDF() {
+        async function generatePDF() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'flex';
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const subjectId = document.getElementById('subjectProgressSelect').value;
             const studentId = document.getElementById('studentProgressSelect').value;
             if (!subjectId || !studentId) {
                 showAlert('يرجى اختيار المادة والطالب', 'danger');
+                loading.style.display = 'none';
                 return;
             }
             const subject = subjects.find(s => s.id === subjectId);
@@ -353,23 +593,89 @@
             const studentEvals = evaluations.filter(eval => eval.subjectId === subjectId && eval.studentId === studentId);
             const subjectSkills = skills.filter(skill => skill.subjectId === subjectId);
 
-            doc.setFont('Amiri');
-            doc.setFontSize(16);
-            doc.text(`تقرير تقدم الطالب: ${student.name}`, 10, 10);
+            // PDF Header
+            doc.setFont('Amiri', 'normal');
+            doc.setFontSize(18);
+            doc.setTextColor(40, 116, 166);
+            doc.text('تقرير تقدم الطالب', 105, 15, { align: 'center' });
+            doc.setFontSize(14);
+            doc.setTextColor(0);
+            doc.text(`الطالب: ${student.name}`, 190, 25, { align: 'right' });
+            doc.text(`المادة: ${subject.name}`, 190, 35, { align: 'right' });
+            doc.text(`التاريخ: ${new Date().toLocaleString('ar-EG')}`, 190, 45, { align: 'right' });
+
+            // Skills Table
             doc.setFontSize(12);
-            doc.text(`المادة: ${subject.name}`, 10, 20);
-            let y = 30;
+            let y = 60;
+            doc.setFillColor(240, 244, 248);
+            doc.rect(10, y - 5, 190, 10, 'F');
+            doc.setTextColor(40, 116, 166);
+            doc.text('المهارة', 150, y);
+            doc.text('متوسط الدرجة', 30, y);
+            doc.setTextColor(0);
+            y += 10;
+            doc.setLineWidth(0.5);
+            doc.line(10, y - 5, 200, y - 5);
             subjectSkills.forEach(skill => {
                 const scores = studentEvals.map(eval => eval.scores[skill.id] || 0);
                 const avg = scores.length ? (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(2) : 0;
-                doc.text(`${skill.name}: ${avg}`, 10, y);
+                doc.text(skill.name, 190, y, { align: 'right' });
+                doc.text(`${avg}`, 30, y);
                 y += 10;
+                doc.line(10, y - 5, 200, y - 5);
             });
-            doc.save(`${student.name}_تقرير_تقدم.pdf`);
+
+            // Add Chart to PDF
+            if (chart) {
+                const canvas = document.getElementById('progressChart');
+                const chartImage = await html2canvas(canvas);
+                const imgData = chartImage.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', 10, y + 10, 190, 100);
+            }
+
+            // Save PDF
+            doc.save(`${student.name}_تقرير_تقدم_${subject.name}.pdf`);
             showAlert('تم إنشاء التقرير بنجاح');
+            loading.style.display = 'none';
         }
 
-        // Event listeners for dynamic updates
+        // Clear all data
+        function clearData() {
+            if (confirm('هل أنت متأكد من مسح جميع البيانات؟ هذا الإجراء لا يمكن التراجع عنه!')) {
+                subjects = [];
+                students = [];
+                skills = [];
+                evaluations = [];
+                localStorage.removeItem('subjects');
+                localStorage.removeItem('students');
+                localStorage.removeItem('skills');
+                localStorage.removeItem('evaluations');
+                updateAllSelects();
+                updateEvaluationsTable();
+                if (chart) chart.destroy();
+                chart = null;
+                showAlert('تم مسح جميع البيانات بنجاح', 'success');
+            }
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+            localStorage.setItem('theme', theme);
+            document.getElementById('themeToggle').className = `fas fa-${theme === 'dark' ? 'sun' : 'moon'} theme-toggle`;
+        }
+
+        function loadTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').className = 'fas fa-sun theme-toggle';
+            }
+        }
+
+        // Event listeners
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
         document.getElementById('subjectEvalSelect').addEventListener('change', updateStudentSelect);
         document.getElementById('subjectProgressSelect').addEventListener('change', updateStudentSelect);
     </script>
