@@ -3,693 +3,1720 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام تقييم المدرسين</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="description" content="نظام متابعة طلاب الصف الأول الابتدائي - مدارس البشرى الأهلية">
+    <meta name="author" content="مدارس البشرى الأهلية">
+    <title>نظام متابعة الطلاب - مدارس البشرى الأهلية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.1/purify.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" defer></script>
     <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --bg-light: rgba(255,255,255,0.95);
+            --bg-dark: #1f2937;
+            --text-dark: #1f2937;
+            --text-light: #f3f4f6;
+        }
+
+        [data-theme="dark"] {
+            --bg-light: #1f2937;
+            --text-dark: #f3f4f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            background: #f4f7fa;
-            font-family: 'Tajawal', sans-serif;
+            font-family: 'Noto Naskh Arabic', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            margin: 0;
+            color: var(--text-dark);
+            transition: background 0.3s, color 0.3s;
         }
+        
         .container {
-            background: white;
-            border-radius: 10px;
+            max-width: 1400px;
+            margin: 0 auto;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            margin: 20px auto;
         }
-        h1 {
-            color: #1a237e;
+        
+        .header {
+            background: var(--bg-light);
+            backdrop-filter: blur(15px);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
             text-align: center;
-            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .header h1 {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 3rem;
+            margin-bottom: 15px;
             font-weight: 700;
         }
-        h5 {
-            color: #34495e;
-            margin-bottom: 15px;
+        
+        .header p {
+            color: #6b7280;
+            font-size: 1.3rem;
+            font-weight: 500;
         }
-        .form-control, .btn {
-            border-radius: 8px;
+        
+        .login-section {
+            background: var(--bg-light);
+            padding: 60px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
         }
-        .form-control:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
-        }
-        .btn-primary {
-            background: #3498db;
-            border: none;
-        }
-        .btn-primary:hover {
-            background: #2980b9;
-        }
-        .btn-success {
-            background: #27ae60;
-        }
-        .btn-success:hover {
-            background: #219653;
-        }
-        .btn-danger {
-            background: #c0392b;
-        }
-        .btn-danger:hover {
-            background: #a93226;
-        }
-        .card {
-            margin-bottom: 20px;
-            border: none;
-            border-radius: 10px;
-            background: #f9fafb;
-        }
-        .card-body {
-            padding: 20px;
-        }
-        canvas {
-            max-width: 100%;
-            margin: 15px auto;
-            background: #fff;
-            border-radius: 8px;
-            padding: 10px;
-        }
-        .alert {
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .alert i {
-            font-size: 1.2rem;
-        }
-        .skills-container {
-            margin-top: 15px;
-        }
-        .skill-input {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        label {
-            color: #34495e;
-            min-width: 100px;
-        }
-        .evaluations-table {
-            margin-top: 15px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: right;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background: #3498db;
+        
+        .google-btn {
+            background: linear-gradient(45deg, #4285f4, #1a73e8);
             color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(66, 133, 244, 0.3);
         }
-        .loading {
+        
+        .google-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(66, 133, 244, 0.4);
+        }
+        
+        .google-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .dashboard {
+            display: none;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+        }
+        
+        .sidebar, .main-content {
+            background: var(--bg-light);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 8px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+            font-weight: 600;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(79, 70, 229, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, var(--danger), #b91c1c);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, var(--success), #047857);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, var(--warning), #f59e0b);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            margin: 3px;
+        }
+        
+        .student-card {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            padding: 25px;
+            margin: 15px 0;
+            border-radius: 20px;
+            border-left: 6px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s ease forwards;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .student-card:hover {
+            transform: translateX(-8px) translateY(-3px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .student-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            background: #e5e7eb;
+        }
+        
+        .skill-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px;
+            margin: 12px 0;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 15px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .skill-item:hover {
+            transform: translateX(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .skill-management {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 15px;
+            border-left: 4px solid var(--warning);
+        }
+
+        .skill-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px;
+            background: white;
+        }
+
+        .skill-list-item, .delegated-teacher-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .delegated-teacher-item span {
+            font-weight: 600;
+        }
+
+        .delegated-teacher-item .permission {
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+        
+        .mastered { color: var(--success); }
+        .not-mastered { color: var(--danger); }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), #047857);
+            transition: width 0.6s ease;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        
+        input[type="text"], input[type="search"], input[type="file"], select {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            background: var(--bg-light);
+            margin: 10px 0;
+        }
+        
+        input[type="text"]:focus, input[type="search"]:focus, input[type="file"]:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(248, 250, 252, 0.5);
+            border-radius: 20px;
+        }
+        
+        .welcome-message {
+            text-align: center;
+            padding: 80px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 25px;
+            border: 2px dashed #cbd5e1;
+        }
+        
+        .welcome-message h2 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .welcome-message p {
+            color: #6b7280;
+            font-size: 1.3rem;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .modal {
+            display: none;
             position: fixed;
-            top: 0;
+            z-index: 1000;
             left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
         }
-        .loading-spinner {
+
+        .modal-content {
+            background: var(--bg-light);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+
+        .close {
+            color: #aaa;
+            float: left;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: var(--text-dark);
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: var(--danger);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--bg-light);
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .student-details-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .student-details-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            background: #e5e7eb;
+        }
+
+        .no-subjects-message {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-radius: 15px;
+            border: 2px dashed #f59e0b;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr; }
+            .header h1 { font-size: 2rem; }
+            .container { padding: 15px; }
+            .tab-buttons { flex-direction: column; }
+            .theme-toggle { top: 10px; left: 10px; }
+            .student-image { width: 40px; height: 40px; }
+            .student-details-image { width: 80px; height: 80px; }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
             width: 30px;
             height: 30px;
             animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @media (max-width: 576px) {
-            .container {
-                padding: 15px;
-                margin: 15px;
-            }
-            h1 {
-                font-size: 1.5rem;
-            }
-            label {
-                min-width: 80px;
-            }
+            margin: 0 auto;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="تبديل الوضع الليلي">🌙</button>
     <div class="container">
-        <h1>نظام تقييم المدرسين</h1>
-
-        <!-- Alert for user feedback -->
-        <div id="alert" class="alert d-none" role="alert">
-            <i class="fas"></i> <span></span>
+        <div class="header">
+            <h1>🏫 مدارس البشرى الأهلية</h1>
+            <p>نظام متابعة طلاب الصف الأول الابتدائي</p>
         </div>
 
-        <!-- Loading spinner -->
-        <div class="loading" id="loading">
-            <div class="loading-spinner"></div>
+        <div id="loginSection" class="login-section">
+            <h2>مرحباً بك في نظام المتابعة</h2>
+            <p>يرجى إدخال اسم المستخدم</p>
+            <input type="text" id="loginUserName" placeholder="اسم المستخدم" aria-label="اسم المستخدم">
+            <button class="google-btn" onclick="mockGoogleLogin()" aria-label="تسجيل الدخول">🔐 تسجيل الدخول</button>
         </div>
 
-        <!-- إضافة مادة -->
-        <div class="card">
-            <div class="card-body">
-                <h5><i class="fas fa-book me-2"></i>إضافة مادة</h5>
-                <input type="text" id="subjectName" class="form-control mb-3" placeholder="اسم المادة" aria-label="اسم المادة">
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary" onclick="addSubject()">إضافة المادة</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('subjectName').value = ''">مسح</button>
+        <div id="dashboard" class="dashboard">
+            <div class="sidebar">
+                <div style="margin-bottom: 30px;">
+                    <h3>اسم المعلم/ة:</h3>
+                    <input type="text" id="teacherName" placeholder="أدخل اسمك" onchange="save()" aria-label="اسم المعلم">
+                    <button class="btn btn-danger" onclick="logout()" style="margin-top: 10px; width: 100%;" aria-label="تسجيل الخروج">
+                        🚪 تسجيل الخروج
+                    </button>
+                </div>
+                
+                <div class="search-container">
+                    <input type="search" id="studentSearch" placeholder="ابحث عن طالب..." oninput="searchStudents()" aria-label="البحث عن طالب">
+                </div>
+                
+                <h3>إدارة الطلاب</h3>
+                <input type="text" id="newStudent" placeholder="اسم الطالب الجديد" aria-label="اسم الطالب الجديد">
+                <input type="file" id="newStudentImage" accept="image/*" aria-label="صورة الطالب الجديد">
+                <button class="btn" onclick="addStudent()" aria-label="إضافة طالب جديد">➕ إضافة طالب</button>
+                
+                <div style="margin: 20px 0;">
+                    <button class="btn btn-success" onclick="exportData()" aria-label="تصدير البيانات">📤 تصدير البيانات</button>
+                    <button class="btn btn-warning" onclick="importData()" aria-label="استيراد البيانات">📥 استيراد البيانات</button>
+                    <button class="btn btn-danger" onclick="resetData()" aria-label="إعادة تعيين البيانات">🔄 إعادة تعيين</button>
+                </div>
+                
+                <div id="studentsList"></div>
+            </div>
+
+            <div class="main-content">
+                <div id="errorMessage" class="error-message" role="alert"></div>
+                <div id="studentDetails" style="display: none;">
+                    <div class="student-details-header">
+                        <img id="currentStudentImage" class="student-details-image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="صورة الطالب">
+                        <div>
+                            <h2 id="currentStudentName"></h2>
+                            <input type="file" id="updateStudentImage" accept="image/*" aria-label="تحديث صورة الطالب">
+                            <button class="btn btn-small" onclick="updateStudentImage()" aria-label="تحديث الصورة">تحديث الصورة</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-buttons" id="subjectTabs"></div>
+                    <div id="content"></div>
+                </div>
+                
+                <div id="welcome" class="welcome-message">
+                    <h2>مرحباً في نظام المتابعة</h2>
+                    <p>اختر طالباً من القائمة الجانبية لبدء المتابعة</p>
                 </div>
             </div>
         </div>
-
-        <!-- إضافة طالب -->
-        <div class="card">
-            <div class="card-body">
-                <h5><i class="fas fa-user-graduate me-2"></i>إضافة طالب</h5>
-                <select id="subjectSelect" class="form-control mb-3" aria-label="اختر المادة"></select>
-                <input type="text" id="studentName" class="form-control mb-3" placeholder="اسم الطالب" aria-label="اسم الطالب">
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary" onclick="addStudent()">إضافة الطالب</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('studentName').value = ''; document.getElementById('subjectSelect').value = ''">مسح</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- إضافة مهارة -->
-        <div class="card">
-            <div class="card-body">
-                <h5><i class="fas fa-star me-2"></i>إضافة مهارة</h5>
-                <select id="subjectSkillSelect" class="form-control mb-3" aria-label="اختر المادة"></select>
-                <input type="text" id="skillName" class="form-control mb-3" placeholder="اسم المهارة" aria-label="اسم المهارة">
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary" onclick="addSkill()">إضافة المهارة</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('skillName').value = ''; document.getElementById('subjectSkillSelect').value = ''">مسح</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- إضافة تحضير -->
-        <div class="card">
-            <div class="card-body">
-                <h5><i class="fas fa-clipboard me-2"></i>إضافة تحضير</h5>
-                <select id="subjectPrepSelect" class="form-control mb-3" aria-label="اختر المادة"></select>
-                <input type="text" id="prepTopic" class="form-control mb-3" placeholder="موضوع التحضير" aria-label="موضوع التحضير">
-                <textarea id="prepNotes" class="form-control mb-3" placeholder="ملاحظات التحضير" aria-label="ملاحظات التحضير"></textarea>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary" onclick="addPreparation()">إضافة التحضير</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('prepTopic').value = ''; document.getElementById('prepNotes').value = ''; document.getElementById('subjectPrepSelect').value = ''">مسح</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- تقييم الطالب -->
-        <div class="card">
-            <div class="card-body">
-                <h5><i class="fas fa-edit me-2"></i>تقييم الطالب</h5>
-                <select id="subjectEvalSelect" class="form-control mb-3" aria-label="اختر المادة"></select>
-                <select id="studentEvalSelect" class="form-control mb-3" aria-label="اختر الطالب"></select>
-                <select id="evalType" class="form-control mb-3" aria-label="نوع التقييم">
-                    <option value="numeric">درجات (0-100)</option>
-                    <option value="mastery">أتقن / لم يتقن</option>
-                </select>
-                <div id="skillsEval" class="skills-container"></div>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary mt-2" onclick="saveEvaluation()">حفظ التقييم</button>
-                    <button class="btn btn-secondary mt-2" onclick="document.querySelectorAll('#skillsEval input, #skillsEval select').forEach(el => el.value = ''); document.getElementById('subjectEvalSelect').value = ''; document.getElementById('studentEvalSelect').value = ''; document.getElementById('evalType').value = 'numeric'">مسح</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- عرض تقدم الطالب -->
-        <div class="card">
-            <div class="card-body">
-                <h5><i class="fas fa-chart-bar me-2"></i>عرض تقدم الطالب</h5>
-                <select id="subjectProgressSelect" class="form-control mb-3" aria-label="اختر المادة"></select>
-                <select id="studentProgressSelect" class="form-control mb-3" aria-label="اختر الطالب"></select>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary" onclick="showProgress()">عرض التقدم</button>
-                    <button class="btn btn-success" onclick="generatePDF()">إنشاء تقرير PDF</button>
-                </div>
-                <canvas id="progressChart"></canvas>
-                <div class="evaluations-table">
-                    <h6>التقييمات السابقة</h6>
-                    <table id="evaluationsTable" class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>المهارات</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- مسح البيانات -->
-        <div class="card">
-            <div class="card-body">
-                <h5><i class="fas fa-trash-alt me-2"></i>إدارة البيانات</h5>
-                <button class="btn btn-danger" onclick="clearData()">مسح جميع البيانات</button>
-            </div>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>جاري التحميل...</p>
         </div>
     </div>
 
+    <div id="skillModal" class="modal" role="dialog">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('skillModal')" aria-label="إغلاق النافذة">×</span>
+            <h2>إضافة مهارة جديدة</h2>
+            <select id="skillSubject" aria-label="اختيار المادة"></select>
+            <input type="text" id="newSkillName" placeholder="اسم المهارة الجديدة" aria-label="اسم المهارة الجديدة">
+            <button class="btn" onclick="addNewSkill()" aria-label="إضافة المهارة" id="addSkillButton">إضافة المهارة</button>
+        </div>
+    </div>
+
+    <div id="subjectModal" class="modal" role="dialog">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('subjectModal')" aria-label="إغلاق النافذة">×</span>
+            <h2>إضافة مادة جديدة</h2>
+            <input type="text" id="newSubjectName" placeholder="اسم المادة الجديدة" aria-label="اسم المادة الجديدة">
+            <button class="btn" onclick="addNewSubject()" aria-label="إضافة المادة">إضافة المادة</button>
+        </div>
+    </div>
+
+    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleFileImport(event)">
+
     <script>
-        // Initialize data structures
-        let subjects = JSON.parse(localStorage.getItem('subjects')) || [];
-        let students = JSON.parse(localStorage.getItem('students')) || [];
-        let skills = JSON.parse(localStorage.getItem('skills')) || [];
-        let evaluations = JSON.parse(localStorage.getItem('evaluations')) || [];
-        let preparations = JSON.parse(localStorage.getItem('preparations')) || [];
-        let chart = null;
+        const defaultSkills = {
+            reading: ['التعرف على الحروف', 'الحروف بحركة الفتح', 'الحروف بحركة الكسر', 'الحروف بحركة الضم', 'سرعة الأداء في الحروف', 'قراءة كلمات ثلاثية', 'المد بالألف والواو والياء', 'السكون', 'اللام القمرية', 'الشدة', 'اللام الشمسية', 'التنوين'],
+            writing: ['التعرف على الحروف', 'الحروف بحركة الفتح', 'الحروف بحركة الكسر والضم', 'سرعة الأداء في الحروف', 'كتابة كلمات ثلاثية', 'المد بالألف والواو والياء', 'السكون', 'اللام القمرية', 'الشدة', 'اللام الشمسية', 'التنوين', 'التاء المربوطة']
+        };
 
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', () => {
-            updateAllSelects();
-            document.getElementById('evalType').addEventListener('change', updateSkillsEval);
-        });
+        const defaultSubjectNames = { reading: 'القراءة', writing: 'الكتابة' };
 
-        // Show alert message
-        function showAlert(message, type = 'success') {
-            const alert = document.getElementById('alert');
-            const icon = alert.querySelector('i');
-            const text = alert.querySelector('span');
-            text.textContent = message;
-            alert.className = `alert alert-${type} d-block`;
-            icon.className = `fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`;
-            setTimeout(() => alert.className = 'alert d-none', 3000);
+        const defaultImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+
+        let skills = {...defaultSkills};
+        let subjectNames = {...defaultSubjectNames};
+        let delegatedTeachers = {};
+        let current = null, data = {}, currentUser = null;
+        let chartInstance = null;
+        const ENCRYPTION_KEY = 'schools-albushra-2025';
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
         }
 
-        // Update all dropdowns
-        function updateAllSelects() {
-            updateSelect('subjectSelect');
-            updateSelect('subjectSkillSelect');
-            updateSelect('subjectEvalSelect');
-            updateSelect('subjectPrepSelect');
-            updateSelect('subjectProgressSelect');
-            updateStudentSelect();
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 5000);
         }
 
-        // Update subject dropdowns
-        function updateSelect(selectId) {
-            const select = document.getElementById(selectId);
-            select.innerHTML = '<option value="">اختر المادة</option>';
-            subjects.forEach(subject => {
-                const option = document.createElement('option');
-                option.value = subject.id;
-                option.textContent = subject.name;
-                select.appendChild(option);
-            });
+        function sanitizeInput(input) {
+            return DOMPurify.sanitize(input.trim(), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
         }
 
-        // Update student dropdown
-        function updateStudentSelect() {
-            const subjectId = document.getElementById('subjectEvalSelect').value || document.getElementById('subjectProgressSelect').value;
-            const studentSelect = document.getElementById('studentEvalSelect');
-            const studentProgressSelect = document.getElementById('studentProgressSelect');
-            
-            studentSelect.innerHTML = '<option value="">اختر الطالب</option>';
-            studentProgressSelect.innerHTML = '<option value="">اختر الطالب</option>';
-            
-            students.filter(student => student.subjectId === subjectId).forEach(student => {
-                const option = document.createElement('option');
-                option.value = student.id;
-                option.textContent = student.name;
-                studentSelect.appendChild(option.cloneNode(true));
-                studentProgressSelect.appendChild(option);
-            });
-
-            if (subjectId) {
-                updateSkillsEval();
-                updateEvaluationsTable();
+        function encryptData(data) {
+            if (!window.CryptoJS) {
+                throw new Error('مكتبة التشفير غير متوفرة');
             }
+            return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
         }
 
-        // Add a subject
-        function addSubject() {
-            const subjectName = document.getElementById('subjectName').value.trim();
-            if (!subjectName) {
-                showAlert('يرجى إدخال اسم المادة', 'danger');
-                return;
+        function decryptData(encrypted) {
+            if (!window.CryptoJS) {
+                throw new Error('مكتبة التشفير غير متوفرة');
             }
-            if (subjects.some(subject => subject.name.toLowerCase() === subjectName.toLowerCase())) {
-                showAlert('المادة موجودة بالفعل', 'danger');
-                return;
-            }
-            const subject = { id: Date.now().toString(), name: subjectName };
-            subjects.push(subject);
-            localStorage.setItem('subjects', JSON.stringify(subjects));
-            updateAllSelects();
-            document.getElementById('subjectName').value = '';
-            showAlert('تم إضافة المادة بنجاح');
-        }
-
-        // Add a student
-        function addStudent() {
-            const subjectId = document.getElementById('subjectSelect').value;
-            const studentName = document.getElementById('studentName').value.trim();
-            if (!subjectId || !studentName) {
-                showAlert('يرجى اختيار المادة وإدخال اسم الطالب', 'danger');
-                return;
-            }
-            if (students.some(student => student.name.toLowerCase() === studentName.toLowerCase() && student.subjectId === subjectId)) {
-                showAlert('الطالب موجود بالفعل في هذه المادة', 'danger');
-                return;
-            }
-            const student = { id: Date.now().toString(), name: studentName, subjectId };
-            students.push(student);
-            localStorage.setItem('students', JSON.stringify(students));
-            updateStudentSelect();
-            document.getElementById('studentName').value = '';
-            showAlert('تم إضافة الطالب بنجاح');
-        }
-
-        // Add a skill
-        function addSkill() {
-            const subjectId = document.getElementById('subjectSkillSelect').value;
-            const skillName = document.getElementById('skillName').value.trim();
-            if (!subjectId || !skillName) {
-                showAlert('يرجى اختيار المادة وإدخال اسم المهارة', 'danger');
-                return;
-            }
-            if (skills.some(skill => skill.name.toLowerCase() === skillName.toLowerCase() && skill.subjectId === subjectId)) {
-                showAlert('المهارة موجودة بالفعل في هذه المادة', 'danger');
-                return;
-            }
-            const skill = { id: Date.now().toString(), name: skillName, subjectId };
-            skills.push(skill);
-            localStorage.setItem('skills', JSON.stringify(skills));
-            document.getElementById('skillName').value = '';
-            updateSkillsEval();
-            showAlert('تم إضافة المهارة بنجاح');
-        }
-
-        // Add preparation
-        function addPreparation() {
-            const subjectId = document.getElementById('subjectPrepSelect').value;
-            const topic = document.getElementById('prepTopic').value.trim();
-            const notes = document.getElementById('prepNotes').value.trim();
-            if (!subjectId || !topic) {
-                showAlert('يرجى اختيار المادة وإدخال موضوع التحضير', 'danger');
-                return;
-            }
-            const preparation = { id: Date.now().toString(), subjectId, topic, notes, timestamp: new Date().toLocaleString('ar-EG') };
-            preparations.push(preparation);
-            localStorage.setItem('preparations', JSON.stringify(preparations));
-            document.getElementById('prepTopic').value = '';
-            document.getElementById('prepNotes').value = '';
-            showAlert('تم إضافة التحضير بنجاح');
-        }
-
-        // Update evaluation skills
-        function updateSkillsEval() {
-            const subjectId = document.getElementById('subjectEvalSelect').value;
-            const evalType = document.getElementById('evalType').value;
-            const skillsEval = document.getElementById('skillsEval');
-            skillsEval.innerHTML = '';
-            skills.filter(skill => skill.subjectId === subjectId).forEach(skill => {
-                const div = document.createElement('div');
-                div.className = 'skill-input';
-                if (evalType === 'numeric') {
-                    div.innerHTML = `
-                        <label>${skill.name}</label>
-                        <input type="number" class="form-control" data-skill-id="${skill.id}" min="0" max="100" placeholder="أدخل درجة (0-100)" aria-label="درجة ${skill.name}">
-                    `;
-                } else {
-                    div.innerHTML = `
-                        <label>${skill.name}</label>
-                        <select class="form-control" data-skill-id="${skill.id}" aria-label="تقييم ${skill.name}">
-                            <option value="mastered">أتقن</option>
-                            <option value="not_mastered">لم يتقن</option>
-                        </select>
-                    `;
+            try {
+                const bytes = CryptoJS.AES.decrypt(encrypted, ENCRYPTION_KEY);
+                const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                if (!decrypted) {
+                    throw new Error('فشل فك التشفير: بيانات غير صالحة');
                 }
-                skillsEval.appendChild(div);
-            });
+                return JSON.parse(decrypted);
+            } catch (error) {
+                throw new Error('فشل فك التشفير: ' + error.message);
+            }
         }
 
-        // Save evaluation
-        function saveEvaluation() {
-            const subjectId = document.getElementById('subjectEvalSelect').value;
-            const studentId = document.getElementById('studentEvalSelect').value;
-            const evalType = document.getElementById('evalType').value;
-            if (!subjectId || !studentId) {
-                showAlert('يرجى اختيار المادة والطالب', 'danger');
-                return;
-            }
-            const skillInputs = document.querySelectorAll('#skillsEval input, #skillsEval select');
-            if (skillInputs.length === 0) {
-                showAlert('لا توجد مهارات لتقييمها في هذه المادة', 'danger');
-                return;
-            }
-            const evaluation = {
-                id: Date.now().toString(),
-                subjectId,
-                studentId,
-                evalType,
-                scores: {},
-                timestamp: new Date().toLocaleString('ar-EG')
-            };
-            let valid = true;
-            skillInputs.forEach(input => {
-                const skillId = input.dataset.skillId;
-                if (evalType === 'numeric') {
-                    const score = parseInt(input.value);
-                    if (isNaN(score) || score < 0 || score > 100) {
-                        showAlert('يرجى إدخال درجات صحيحة (0-100) لجميع المهارات', 'danger');
-                        valid = false;
-                        return;
+        async function load() {
+            showLoading(true);
+            try {
+                console.log('جاري تحميل البيانات...');
+                const savedData = localStorage.getItem('studentsData');
+                const savedTeacher = localStorage.getItem('teacherName');
+                const savedUser = localStorage.getItem('currentUser');
+                const savedSkills = localStorage.getItem('customSkills');
+                const savedSubjectNames = localStorage.getItem('subjectNames');
+                const savedDelegatedTeachers = localStorage.getItem('delegatedTeachers');
+
+                if (savedData) {
+                    try {
+                        data = decryptData(savedData);
+                    } catch (decryptError) {
+                        try {
+                            data = JSON.parse(savedData);
+                            localStorage.setItem('studentsData', encryptData(data));
+                        } catch (jsonError) {
+                            console.error('فشل تحليل البيانات:', jsonError);
+                            showError('البيانات التالفة، سيتم إعادة التعيين');
+                            data = {};
+                            localStorage.removeItem('studentsData');
+                        }
                     }
-                    evaluation.scores[skillId] = score;
-                } else {
-                    evaluation.scores[skillId] = input.value;
+                    if (!isValidData(data)) {
+                        console.error('بيانات الطلاب غير صالحة');
+                        data = {};
+                        localStorage.removeItem('studentsData');
+                    }
                 }
-            });
-            if (!valid) return;
-            if (confirm('هل أنت متأكد من حفظ التقييم؟')) {
-                evaluations.push(evaluation);
-                localStorage.setItem('evaluations', JSON.stringify(evaluations));
-                skillInputs.forEach(input => input.value = '');
-                document.getElementById('subjectEvalSelect').value = '';
-                document.getElementById('studentEvalSelect').value = '';
-                document.getElementById('evalType').value = 'numeric';
-                updateSkillsEval();
-                updateEvaluationsTable();
-                showAlert('تم حفظ التقييم بنجاح');
+
+                if (savedSkills) {
+                    try {
+                        skills = decryptData(savedSkills);
+                    } catch (decryptError) {
+                        try {
+                            skills = JSON.parse(savedSkills);
+                            localStorage.setItem('customSkills', encryptData(skills));
+                        } catch (jsonError) {
+                            console.error('فشل تحليل المهارات:', jsonError);
+                            skills = {...defaultSkills};
+                            localStorage.removeItem('customSkills');
+                        }
+                    }
+                    if (!isValidSkills(skills)) {
+                        console.error('بيانات المهارات غير صالحة');
+                        skills = {...defaultSkills};
+                        localStorage.removeItem('customSkills');
+                    }
+                } else {
+                    skills = {...defaultSkills};
+                }
+
+                if (savedSubjectNames) {
+                    try {
+                        subjectNames = decryptData(savedSubjectNames);
+                    } catch (decryptError) {
+                        try {
+                            subjectNames = JSON.parse(savedSubjectNames);
+                            localStorage.setItem('subjectNames', encryptData(subjectNames));
+                        } catch (jsonError) {
+                            console.error('فشل تحليل أسماء المواد:', jsonError);
+                            subjectNames = {...defaultSubjectNames};
+                            localStorage.removeItem('subjectNames');
+                        }
+                    }
+                    if (!isValidSubjectNames(subjectNames)) {
+                        console.error('أسماء المواد غير صالحة');
+                        subjectNames = {...defaultSubjectNames};
+                        localStorage.removeItem('subjectNames');
+                    }
+                } else {
+                    subjectNames = {...defaultSubjectNames};
+                }
+
+                if (savedDelegatedTeachers) {
+                    try {
+                        delegatedTeachers = decryptData(savedDelegatedTeachers);
+                    } catch (decryptError) {
+                        try {
+                            delegatedTeachers = JSON.parse(savedDelegatedTeachers);
+                            localStorage.setItem('delegatedTeachers', encryptData(delegatedTeachers));
+                        } catch (jsonError) {
+                            console.error('فشل تحليل بيانات التفويض:', jsonError);
+                            delegatedTeachers = {};
+                            localStorage.removeItem('delegatedTeachers');
+                        }
+                    }
+                    if (!isValidDelegatedTeachers(delegatedTeachers)) {
+                        console.error('بيانات التفويض غير صالحة');
+                        delegatedTeachers = {};
+                        localStorage.removeItem('delegatedTeachers');
+                    }
+                }
+
+                if (savedTeacher) {
+                    document.getElementById('teacherName').value = sanitizeInput(savedTeacher);
+                }
+
+                if (savedUser) {
+                    try {
+                        currentUser = decryptData(savedUser);
+                        document.getElementById('loginSection').style.display = 'none';
+                        document.getElementById('dashboard').style.display = 'grid';
+                    } catch (error) {
+                        console.error('فشل تحميل المستخدم الحالي:', error);
+                        localStorage.removeItem('currentUser');
+                        currentUser = null;
+                    }
+                }
+
+                updateList();
+                updateSubjectTabs();
+                restrictUIByPermission();
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                showError(`حدث خطأ في تحميل البيانات: ${error.message}. حاول إعادة التعيين.`);
+                data = {};
+                skills = {...defaultSkills};
+                subjectNames = {...defaultSubjectNames};
+                delegatedTeachers = {};
+            } finally {
+                showLoading(false);
             }
         }
 
-        // Show progress chart
-        function showProgress() {
-            const subjectId = document.getElementById('subjectProgressSelect').value;
-            const studentId = document.getElementById('studentProgressSelect').value;
-            if (!subjectId || !studentId) {
-                showAlert('يرجى اختيار المادة والطالب', 'danger');
+        function isValidData(data) {
+            if (!data || typeof data !== 'object') return false;
+            return Object.values(data).every(student => 
+                student.name && 
+                (student.image === null || typeof student.image === 'string') &&
+                Object.keys(skills).every(subject => 
+                    typeof student[subject] === 'object' || student[subject] === undefined
+                )
+            );
+        }
+
+        function isValidSkills(skills) {
+            if (!skills || typeof skills !== 'object') return false;
+            return Object.keys(skills).every(subject => 
+                Array.isArray(skills[subject]) && 
+                skills[subject].every(skill => typeof skill === 'string')
+            );
+        }
+
+        function isValidSubjectNames(names) {
+            if (!names || typeof names !== 'object') return false;
+            return Object.entries(names).every(([key, name]) => 
+                typeof key === 'string' && 
+                typeof name === 'string' && 
+                /^[\u0600-\u06FF\s]{2,50}$/.test(name)
+            );
+        }
+
+        function isValidDelegatedTeachers(teachers) {
+            if (!teachers || typeof teachers !== 'object') return false;
+            return Object.entries(teachers).every(([id, teacher]) =>
+                typeof id === 'string' &&
+                teacher.name && typeof teacher.name === 'string' &&
+                ['read', 'edit', 'admin'].includes(teacher.permission)
+            );
+        }
+
+        function save() {
+            try {
+                localStorage.setItem('studentsData', encryptData(data));
+                localStorage.setItem('teacherName', sanitizeInput(document.getElementById('teacherName').value));
+                localStorage.setItem('customSkills', encryptData(skills));
+                localStorage.setItem('subjectNames', encryptData(subjectNames));
+                localStorage.setItem('delegatedTeachers', encryptData(delegatedTeachers));
+                localStorage.setItem('lastSaved', new Date().toISOString());
+                showSaveMessage();
+            } catch (error) {
+                console.error('خطأ في حفظ البيانات:', error);
+                showError('حدث خطأ في حفظ البيانات: ' + error.message);
+            }
+        }
+
+        function showSaveMessage() {
+            const msg = document.createElement('div');
+            msg.innerHTML = '✅ تم الحفظ تلقائياً';
+            msg.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(45deg, var(--success), #047857);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+                z-index: 9999;
+                font-weight: 600;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(msg);
+            setTimeout(() => {
+                msg.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => document.body.removeChild(msg), 300);
+            }, 2000);
+        }
+
+        async function mockGoogleLogin() {
+            showLoading(true);
+            try {
+                if (!window.CryptoJS) {
+                    throw new Error('مكتبة CryptoJS غير متوفرة. تأكد من تحميلها.');
+                }
+                const userName = sanitizeInput(document.getElementById('loginUserName').value);
+                if (!userName) {
+                    showError('يرجى إدخال اسم مستخدم');
+                    return;
+                }
+                const userId = CryptoJS.SHA256(userName + Date.now()).toString();
+                currentUser = {
+                    loginTime: new Date().toISOString(),
+                    userAgent: navigator.userAgent,
+                    userId: userId,
+                    name: userName,
+                    permission: delegatedTeachers[userId]?.permission || 'admin'
+                };
+                console.log('تم تسجيل الدخول:', currentUser);
+                localStorage.setItem('currentUser', encryptData(currentUser));
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'grid';
+                document.getElementById('loginUserName').value = ''; // إعادة تعيين حقل الإدخال
+                await load();
+                restrictUIByPermission();
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error);
+                showError('حدث خطأ أثناء تسجيل الدخول: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function logout() {
+            if (confirm('هل تريد تسجيل الخروج؟ سيتم حفظ جميع البيانات.')) {
+                save();
+                localStorage.removeItem('currentUser');
+                currentUser = null;
+                location.reload();
+            }
+        }
+
+        function resetData() {
+            if (currentUser?.permission !== 'admin') {
+                showError('ليس لديك صلاحية لإعادة تعيين البيانات');
                 return;
             }
-            const studentEvals = evaluations.filter(eval => eval.subjectId === subjectId && eval.studentId === studentId);
-            const subjectSkills = skills.filter(skill => skill.subjectId === subjectId);
-            if (subjectSkills.length === 0) {
-                showAlert('لا توجد مهارات لهذه المادة', 'danger');
+            if (confirm('هل تريد إعادة تعيين جميع البيانات؟ سيتم حذف كل الطلاب والمواد والمهارات والتفويضات.')) {
+                data = {};
+                skills = {};
+                subjectNames = {};
+                delegatedTeachers = {};
+                current = null;
+                localStorage.removeItem('studentsData');
+                localStorage.removeItem('customSkills');
+                localStorage.removeItem('subjectNames');
+                localStorage.removeItem('delegatedTeachers');
+                document.getElementById('studentDetails').style.display = 'none';
+                document.getElementById('welcome').style.display = 'block';
+                document.getElementById('teacherName').value = '';
+                updateList();
+                updateSubjectTabs();
+                showSaveMessage();
+            }
+        }
+
+        function validateStudentName(name) {
+            const regex = /^[\u0600-\u06FF\s]{2,50}$/;
+            return regex.test(name);
+        }
+
+        function validateTeacherName(name) {
+            const regex = /^[\u0600-\u06FF\s]{2,50}$/;
+            return regex.test(name);
+        }
+
+        function validateImage(file) {
+            const maxSize = 1 * 1024 * 1024; // 1MB
+            const allowedTypes = ['image/jpeg', 'image/png'];
+            if (!file) return true; // Image is optional
+            if (!allowedTypes.includes(file.type)) {
+                showError('يرجى تحميل صورة بصيغة JPEG أو PNG');
+                return false;
+            }
+            if (file.size > maxSize) {
+                showError('حجم الصورة يجب أن يكون أقل من 1 ميجابايت');
+                return false;
+            }
+            return true;
+        }
+
+        function readImage(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) resolve(null);
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('فشل تحميل الصورة'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function addStudent() {
+            if (currentUser?.permission === 'read') {
+                showError('ليس لديك صلاحية لإضافة طالب');
                 return;
             }
-            const labels = subjectSkills.map(skill => skill.name);
-            let data, chartType = 'bar';
-            if (studentEvals.some(eval => eval.evalType === 'mastery')) {
-                chartType = 'bar';
-                data = subjectSkills.map(skill => {
-                    const scores = studentEvals.filter(eval => eval.evalType === 'mastery').map(eval => eval.scores[skill.id] === 'mastered' ? 1 : 0);
-                    return scores.length ? (scores.reduce((sum, score) => sum + score, 0) / scores.length * 100).toFixed(2) : 0;
+            const name = sanitizeInput(document.getElementById('newStudent').value);
+            const imageInput = document.getElementById('newStudentImage');
+            const file = imageInput.files[0];
+
+            if (!validateStudentName(name)) {
+                showError('يرجى إدخال اسم طالب صالح (2-50 حرفًا عربيًا)');
+                return;
+            }
+
+            if (!validateImage(file)) {
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const image = await readImage(file);
+                const id = CryptoJS.SHA256(name + Date.now()).toString();
+                data[id] = { name, image: image || null };
+                
+                Object.keys(skills).forEach(subject => {
+                    data[id][subject] = {};
+                    skills[subject].forEach(skill => {
+                        data[id][subject][skill] = 'not_assessed';
+                    });
                 });
+                
+                document.getElementById('newStudent').value = '';
+                imageInput.value = '';
+                save();
+                updateList();
+            } catch (error) {
+                console.error('خطأ في إضافة الطالب:', error);
+                showError('حدث خطأ أثناء إضافة الطالب: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function updateStudentImage() {
+            if (currentUser?.permission === 'read') {
+                showError('ليس لديك صلاحية لتحديث الصورة');
+                return;
+            }
+            if (!current) return;
+            const imageInput = document.getElementById('updateStudentImage');
+            const file = imageInput.files[0];
+
+            if (!validateImage(file)) {
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const image = await readImage(file);
+                data[current].image = image || null;
+                document.getElementById('currentStudentImage').src = image || defaultImage;
+                imageInput.value = '';
+                save();
+                updateList();
+            } catch (error) {
+                console.error('خطأ في تحديث الصورة:', error);
+                showError('حدث خطأ أثناء تحديث الصورة: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function searchStudents() {
+            const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
+            updateList(searchTerm);
+        }
+
+        function updateList(searchTerm = '') {
+            const list = document.getElementById('studentsList');
+            list.innerHTML = '';
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            Object.entries(data)
+                .filter(([_, student]) => student.name.toLowerCase().includes(searchTerm))
+                .forEach(([id, student]) => {
+                    const progress = calcProgress(id);
+                    const card = document.createElement('div');
+                    card.className = 'student-card';
+                    card.setAttribute('role', 'listitem');
+                    card.innerHTML = `
+                        <img src="${student.image || defaultImage}" class="student-image" alt="صورة ${sanitizeInput(student.name)}">
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4>${sanitizeInput(student.name)}</h4>
+                                <div>
+                                    <button class="btn btn-small" onclick="select('${id}')" aria-label="اختيار ${student.name}">اختيار</button>
+                                    <button class="btn btn-danger btn-small" onclick="deleteStudent('${id}')" aria-label="حذف ${student.name}" style="${currentUser?.permission !== 'admin' ? 'display: none;' : ''}">حذف</button>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                            <small>التقدم: ${progress.toFixed(1)}%</small>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                    observer.observe(card);
+                });
+        }
+
+        function calcProgress(id) {
+            const student = data[id];
+            let total = 0, mastered = 0;
+            Object.keys(skills).forEach(subject => {
+                if (student[subject]) {
+                    Object.values(student[subject]).forEach(status => {
+                        total++;
+                        if (status === 'mastered') mastered++;
+                    });
+                }
+            });
+            return total > 0 ? (mastered / total) * 100 : 0;
+        }
+
+        function select(id) {
+            current = id;
+            document.getElementById('welcome').style.display = 'none';
+            document.getElementById('studentDetails').style.display = 'block';
+            document.getElementById('currentStudentName').textContent = sanitizeInput(data[id].name);
+            document.getElementById('currentStudentImage').src = data[id].image || defaultImage;
+            
+            syncStudentSkills(id);
+            updateSubjectTabs();
+            if (Object.keys(skills).length > 0) {
+                showSubject(Object.keys(skills)[0]);
             } else {
-                data = subjectSkills.map(skill => {
-                    const scores = studentEvals.filter(eval => eval.evalType === 'numeric').map(eval => eval.scores[skill.id] || 0);
-                    return scores.length ? (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(2) : 0;
+                showSkillManagement();
+            }
+        }
+
+        function syncStudentSkills(id) {
+            Object.keys(skills).forEach(subject => {
+                if (!data[id][subject]) {
+                    data[id][subject] = {};
+                }
+                skills[subject].forEach(skill => {
+                    if (!(skill in data[id][subject])) {
+                        data[id][subject][skill] = 'not_assessed';
+                    }
+                });
+            });
+            Object.keys(data[id]).forEach(key => {
+                if (key !== 'name' && key !== 'image' && !skills[key]) {
+                    delete data[id][key];
+                }
+            });
+            save();
+        }
+
+        function deleteStudent(id) {
+            if (currentUser?.permission !== 'admin') {
+                showError('ليس لديك صلاحية لحذف الطلاب');
+                return;
+            }
+            if (confirm('هل تريد حذف هذا الطالب؟')) {
+                delete data[id];
+                if (current === id) {
+                    current = null;
+                    document.getElementById('studentDetails').style.display = 'none';
+                    document.getElementById('welcome').style.display = 'block';
+                }
+                save();
+                updateList();
+            }
+        }
+
+        function updateSubjectTabs() {
+            const tabContainer = document.getElementById('subjectTabs');
+            tabContainer.innerHTML = '';
+            if (Object.keys(skills).length === 0) {
+                document.getElementById('content').innerHTML = `
+                    <div class="no-subjects-message">
+                        <h3>لا توجد مواد متاحة</h3>
+                        <p>يرجى إضافة مادة جديدة من قسم إدارة المواد والمهارات</p>
+                    </div>
+                `;
+            } else {
+                Object.keys(skills).forEach(subject => {
+                    const displayName = sanitizeInput(subjectNames[subject] || subject);
+                    const button = document.createElement('button');
+                    button.className = 'btn';
+                    button.innerHTML = `📚 ${displayName}`;
+                    button.setAttribute('aria-label', `عرض مهارات ${displayName}`);
+                    button.onclick = () => showSubject(subject);
+                    tabContainer.appendChild(button);
+                });
+            }
+            const managementButton = document.createElement('button');
+            managementButton.className = 'btn btn-warning';
+            managementButton.innerHTML = '⚙️ إدارة المواد والمهارات';
+            managementButton.setAttribute('aria-label', 'إدارة المواد والمهارات');
+            managementButton.onclick = showSkillManagement;
+            tabContainer.appendChild(managementButton);
+            const chartButton = document.createElement('button');
+            chartButton.className = 'btn';
+            chartButton.innerHTML = '📊 الرسم البياني';
+            chartButton.setAttribute('aria-label', 'عرض الرسم البياني');
+            chartButton.onclick = showChart;
+            tabContainer.appendChild(chartButton);
+            const reportButton = document.createElement('button');
+            reportButton.className = 'btn btn-success';
+            reportButton.innerHTML = '📄 تقرير';
+            reportButton.setAttribute('aria-label', 'إنشاء تقرير');
+            reportButton.onclick = generateReport;
+            tabContainer.appendChild(reportButton);
+            restrictUIByPermission();
+        }
+
+        function showSubject(subject) {
+            if (!current || !skills[subject]) {
+                console.error('خطأ: المادة غير موجودة أو لم يتم اختيار طالب', { subject, current });
+                return;
+            }
+            
+            const displayName = sanitizeInput(subjectNames[subject] || subject);
+            let html = `<h3>${displayName}</h3>`;
+            
+            skills[subject].forEach(skill => {
+                const status = data[current][subject][skill] || 'not_assessed';
+                const disabled = currentUser?.permission === 'read' ? 'disabled' : '';
+                html += `
+                    <div class="skill-item" role="listitem">
+                        <span>${sanitizeInput(skill)}</span>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="${subject}_${skill}" value="mastered" 
+                                    ${status === 'mastered' ? 'checked' : ''} 
+                                    onchange="updateSkill('${subject}', '${skill}', 'mastered')"
+                                    aria-label="أتقن ${skill}" ${disabled}>
+                                <span class="mastered">أتقن</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="${subject}_${skill}" value="not_mastered"
+                                    ${status === 'not_mastered' ? 'checked' : ''} 
+                                    onchange="updateSkill('${subject}', '${skill}', 'not_mastered')"
+                                    aria-label="لم يتقن ${skill}" ${disabled}>
+                                <span class="not-mastered">لم يتقن</span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('content').innerHTML = html;
+        }
+
+        function updateSkill(subject, skill, status) {
+            if (currentUser?.permission === 'read') {
+                showError('ليس لديك صلاحية لتعديل المهارات');
+                return;
+            }
+            data[current][subject][skill] = status;
+            save();
+            updateList();
+        }
+
+        function showSkillManagement() {
+            const addSkillButton = document.getElementById('addSkillButton');
+            addSkillButton.disabled = Object.keys(skills).length === 0;
+
+            let html = `
+                <h3>إدارة المواد والمهارات</h3>
+                <div class="skill-management">
+                    <h4>إضافة مادة جديدة</h4>
+                    <button class="btn btn-warning" onclick="openModal('subjectModal')" aria-label="إضافة مادة جديدة">➕ إضافة مادة</button>
+                </div>
+                <div class="skill-management">
+                    <h4>إضافة مهارة جديدة</h4>
+                    <button class="btn btn-warning" onclick="openModal('skillModal')" aria-label="إضافة مهارة جديدة" ${Object.keys(skills).length === 0 ? 'disabled' : ''}>➕ إضافة مهارة</button>
+                </div>
+                <div class="skill-management">
+                    <h4>إدارة التفويض</h4>
+                    <input type="text" id="newDelegatedTeacher" placeholder="اسم المعلم المفوض" aria-label="اسم المعلم المفوض">
+                    <select id="delegationPermission" aria-label="صلاحية المعلم">
+                        <option value="read">قراءة فقط</option>
+                        <option value="edit">تعديل</option>
+                        <option value="admin">مدير</option>
+                    </select>
+                    <button class="btn btn-warning" onclick="addDelegatedTeacher()" aria-label="إضافة معلم مفوض">➕ إضافة معلم مفوض</button>
+                    <div id="delegatedTeachersList" class="skill-list">
+            `;
+
+            Object.entries(delegatedTeachers).forEach(([id, teacher]) => {
+                const permissionLabel = teacher.permission === 'read' ? 'قراءة فقط' : teacher.permission === 'edit' ? 'تعديل' : 'مدير';
+                html += `
+                    <div class="delegated-teacher-item">
+                        <span>${sanitizeInput(teacher.name)} (${permissionLabel})</span>
+                        <button class="btn btn-danger btn-small" onclick="deleteDelegatedTeacher('${id}')" aria-label="حذف ${teacher.name}" style="${currentUser?.permission !== 'admin' ? 'display: none;' : ''}">حذف</button>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+
+            if (Object.keys(skills).length === 0) {
+                html += `
+                    <div class="no-subjects-message">
+                        <h4>لا توجد مواد</h4>
+                        <p>يرجى إضافة مادة جديدة للبدء</p>
+                    </div>
+                `;
+            } else {
+                Object.keys(skills).forEach(subject => {
+                    const displayName = sanitizeInput(subjectNames[subject] || subject);
+                    html += `
+                        <div class="skill-management">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h4>مهارات ${displayName}</h4>
+                                <button class="btn btn-danger btn-small" onclick="deleteSubject('${subject}')" aria-label="حذف ${displayName}" style="${currentUser?.permission !== 'admin' ? 'display: none;' : ''}">حذف المادة</button>
+                            </div>
+                            <div class="skill-list">
+                    `;
+                    
+                    skills[subject].forEach((skill, index) => {
+                        html += `
+                            <div class="skill-list-item">
+                                <span>${sanitizeInput(skill)}</span>
+                                <button class="btn btn-danger btn-small" onclick="deleteSkill('${subject}', ${index})" aria-label="حذف ${skill}" style="${currentUser?.permission !== 'admin' ? 'display: none;' : ''}">حذف</button>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
                 });
             }
 
-            const ctx = document.getElementById('progressChart').getContext('2d');
-            if (chart) chart.destroy();
-            chart = new Chart(ctx, {
-                type: chartType,
+            document.getElementById('content').innerHTML = html;
+            updateSkillSubjectDropdown();
+            restrictUIByPermission();
+        }
+
+        function updateSkillSubjectDropdown() {
+            const dropdown = document.getElementById('skillSubject');
+            dropdown.innerHTML = '';
+            Object.entries(subjectNames).forEach(([id, name]) => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = sanitizeInput(name);
+                dropdown.appendChild(option);
+            });
+        }
+
+        function openModal(modalId) {
+            if (currentUser?.permission !== 'admin') {
+                showError('ليس لديك صلاحية لإضافة مواد أو مهارات');
+                return;
+            }
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.getElementById('newSkillName').value = '';
+            document.getElementById('newSubjectName').value = '';
+        }
+
+        function validateSubjectName(name) {
+            const regex = /^[\u0600-\u06FF\s]{2,50}$/;
+            return regex.test(name);
+        }
+
+        function validateSkillName(name) {
+            const regex = /^[\u0600-\u06FF\s]{2,100}$/;
+            return regex.test(name);
+        }
+
+        function addNewSubject() {
+            if (currentUser?.permission !== 'admin') {
+                showError('ليس لديك صلاحية لإضافة مادة');
+                return;
+            }
+            const name = sanitizeInput(document.getElementById('newSubjectName').value);
+            if (!validateSubjectName(name)) {
+                showError('يرجى إدخال اسم مادة صالح (2-50 حرف عربي)');
+                return;
+            }
+
+            try {
+                const id = CryptoJS.SHA256(name + Date.now()).toString();
+                if (Object.values(subjectNames).includes(name)) {
+                    showError('هذه المادة موجودة بالفعل');
+                    return;
+                }
+
+                skills[id] = [];
+                subjectNames[id] = name;
+                Object.keys(data).forEach(studentId => {
+                    data[studentId][id] = {};
+                });
+
+                save();
+                closeModal('subjectModal');
+                showSkillManagement();
+                updateSubjectTabs();
+                showSaveMessage();
+                console.log(`تم إضافة المادة: ${name}`);
+            } catch (error) {
+                console.error('خطأ في إضافة المادة:', error);
+                showError('حدث خطأ أثناء إضافة المادة: ' + error.message);
+            }
+        }
+
+        function addNewSkill() {
+            if (currentUser?.permission !== 'admin') {
+                showError('ليس لديك صلاحية لإضافة مهارة');
+                return;
+            }
+            const subject = document.getElementById('skillSubject').value;
+            const skillName = sanitizeInput(document.getElementById('newSkillName').value);
+            
+            if (!subject) {
+                showError('يرجى إضافة مادة أولاً');
+                return;
+            }
+
+            if (!validateSkillName(skillName)) {
+                showError('يرجى إدخال اسم مهارة صالح (2-100 حرف عربي)');
+                return;
+            }
+
+            if (skills[subject].includes(skillName)) {
+                showError('هذه المهارة موجودة بالفعل في هذه المادة');
+                return;
+            }
+
+            try {
+                skills[subject].push(skillName);
+                Object.keys(data).forEach(studentId => {
+                    if (!data[studentId][subject]) {
+                        data[studentId][subject] = {};
+                    }
+                    data[studentId][subject][skillName] = 'not_assessed';
+                });
+
+                save();
+                closeModal('skillModal');
+                showSkillManagement();
+                updateSubjectTabs();
+                showSaveMessage();
+                console.log(`تم إضافة المهارة "${skillName}" إلى المادة "${subjectNames[subject]}"`);
+            } catch (error) {
+                console.error('خطأ في إضافة المهارة:', error);
+                showError('حدث خطأ أثناء إضافة المهارة: ' + error.message);
+            }
+        }
+
+        function deleteSubject(subject) {
+            if (currentUser?.permission !== 'admin') {
+                showError('ليس لديك صلاحية لحذف المواد');
+                return;
+            }
+            try {
+                const displayName = sanitizeInput(subjectNames[subject] || subject);
+                if (confirm(`⚠️ هل أنت متأكد من حذف مادة "${displayName}"؟\nسيتم حذف جميع المهارات المرتبطة بها من جميع الطلاب، ولا يمكن التراجع عن هذا الإجراء.`)) {
+                    delete skills[subject];
+                    delete subjectNames[subject];
+                    Object.keys(data).forEach(studentId => {
+                        delete data[studentId][subject];
+                    });
+                    save();
+                    updateSubjectTabs();
+                    if (current && Object.keys(skills).length > 0) {
+                        showSubject(Object.keys(skills)[0]);
+                    } else {
+                        showSkillManagement();
+                    }
+                    updateList();
+                    console.log(`تم حذف المادة: ${displayName}`);
+                }
+            } catch (error) {
+                console.error('خطأ في حذف المادة:', error);
+                showError('حدث خطأ أثناء حذف المادة: ' + error.message);
+            }
+        }
+
+        function deleteSkill(subject, skillIndex) {
+            if (currentUser?.permission !== 'admin') {
+                showError('ليس لديك صلاحية لحذف المهارات');
+                return;
+            }
+            try {
+                const skillName = skills[subject][skillIndex];
+                const displayName = sanitizeInput(subjectNames[subject] || subject);
+                if (confirm(`⚠️ هل أنت متأكد من حذف مهارة "${sanitizeInput(skillName)}" من مادة "${displayName}"؟\nسيتم حذفها من جميع الطلاب، ولا يمكن التراجع عن هذا الإجراء.`)) {
+                    skills[subject].splice(skillIndex, 1);
+                    if (skills[subject].length === 0) {
+                        delete skills[subject];
+                        delete subjectNames[subject];
+                        Object.keys(data).forEach(studentId => {
+                            delete data[studentId][subject];
+                        });
+                    } else {
+                        Object.keys(data).forEach(studentId => {
+                            delete data[studentId][subject][skillName];
+                        });
+                    }
+                    save();
+                    updateSubjectTabs();
+                    if (Object.keys(skills).length === 0) {
+                        showSkillManagement();
+                    } else if (current && skills[subject]) {
+                        showSubject(subject);
+                    } else if (current) {
+                        showSubject(Object.keys(skills)[0]);
+                    } else {
+                        showSkillManagement();
+                    }
+                    updateList();
+                    console.log(`تم حذف المهارة "${skillName}" من المادة "${displayName}"`);
+                }
+            } catch (error) {
+                console.error('خطأ في حذف المهارة:', error);
+                showError('حدث خطأ أثناء حذف المهارة: ' + error.message);
+            }
+        }
+
+        function addDelegatedTeacher() {
+            if (currentUser?.permission !== 'admin') {
+                showError('ليس لديك صلاحية لإضافة معلم مفوض');
+                return;
+            }
+            const teacherName = sanitizeInput(document.getElementById('newDelegatedTeacher').value);
+            const permission = document.getElementById('delegationPermission').value;
+            
+            if (!validateTeacherName(teacherName)) {
+                showError('يرجى إدخال اسم معلم صالح (2-50 حرفًا عربيًا)');
+                return;
+            }
+
+            if (Object.values(delegatedTeachers).some(t => t.name === teacherName)) {
+                showError('هذا المعلم موجود بالفعل');
+                return;
+            }
+
+            try {
+                const teacherId = CryptoJS.SHA256(teacherName + Date.now()).toString();
+                delegatedTeachers[teacherId] = { name: teacherName, permission };
+                save();
+                document.getElementById('newDelegatedTeacher').value = '';
+                showSkillManagement();
+                showSaveMessage();
+                console.log(`تم إضافة المعلم المفوض: ${teacherName} بصلاحية ${permission}`);
+            } catch (error) {
+                console.error('خطأ في إضافة المعلم المفوض:', error);
+                showError('حدث خطأ أثناء إضافة المعلم: ' + error.message);
+            }
+        }
+
+        function deleteDelegatedTeacher(teacherId) {
+            if (currentUser?.permission !== 'admin') {
+                showError('ليس لديك صلاحية لحذف معلم مفوض');
+                return;
+            }
+            try {
+                const teacherName = delegatedTeachers[teacherId].name;
+                if (teacherId === currentUser?.userId) {
+                    showError('لا يمكنك حذف نفسك كمعلم مفوض');
+                    return;
+                }
+                if (confirm(`⚠️ هل أنت متأكد من حذف المعلم المفوض "${sanitizeInput(teacherName)}"؟`)) {
+                    delete delegatedTeachers[teacherId];
+                    save();
+                    showSkillManagement();
+                    console.log(`تم حذف المعلم المفوض: ${teacherName}`);
+                }
+            } catch (error) {
+                console.error('خطأ في حذف المعلم المفوض:', error);
+                showError('حدث خطأ أثناء حذف المعلم: ' + error.message);
+            }
+        }
+
+        function restrictUIByPermission() {
+            const permission = currentUser?.permission || 'admin';
+            const deleteButtons = document.querySelectorAll('.btn-danger');
+            const editInputs = document.querySelectorAll('input[type="text"], input[type="file"], select, .btn:not(.btn-danger):not(.btn-success):not(.btn-warning)');
+            
+            if (permission === 'read') {
+                editInputs.forEach(input => input.disabled = true);
+                deleteButtons.forEach(button => button.style.display = 'none');
+                document.querySelectorAll('.btn-warning').forEach(button => button.disabled = true);
+                document.getElementById('addSkillButton').disabled = true;
+            } else if (permission === 'edit') {
+                deleteButtons.forEach(button => button.style.display = 'none');
+                document.querySelectorAll('.btn-warning').forEach(button => button.disabled = true);
+                document.getElementById('addSkillButton').disabled = true;
+            } else {
+                editInputs.forEach(input => input.disabled = false);
+                deleteButtons.forEach(button => button.style.display = 'inline-block');
+                document.querySelectorAll('.btn-warning').forEach(button => button.disabled = false);
+                document.getElementById('addSkillButton').disabled = Object.keys(skills).length === 0;
+            }
+        }
+
+        function exportData() {
+            try {
+                const exportData = {
+                    students: data,
+                    skills: skills,
+                    subjectNames: subjectNames,
+                    delegatedTeachers: delegatedTeachers,
+                    lastSaved: new Date().toISOString()
+                };
+                const dataStr = JSON.stringify(exportData);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `student_data_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showSaveMessage();
+            } catch (error) {
+                console.error('خطأ في تصدير البيانات:', error);
+                showError('حدث خطأ أثناء تصدير البيانات: ' + error.message);
+            }
+        }
+
+        function importData() {
+            if (currentUser?.permission !== 'admin') {
+                showError('ليس لديك صلاحية لاستيراد البيانات');
+                return;
+            }
+            document.getElementById('importFile').click();
+        }
+
+        async function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showLoading(true);
+            try {
+                const text = await file.text();
+                const importedData = JSON.parse(text);
+
+                if (!importedData.students || !importedData.skills || !importedData.subjectNames) {
+                    throw new Error('ملف غير صالح: يجب أن يحتوي على بيانات الطلاب والمهارات وأسماء المواد');
+                }
+
+                if (isValidData(importedData.students) && isValidSkills(importedData.skills) && isValidSubjectNames(importedData.subjectNames)) {
+                    data = importedData.students;
+                    skills = importedData.skills;
+                    subjectNames = importedData.subjectNames;
+                    delegatedTeachers = importedData.delegatedTeachers || {};
+                    if (!isValidDelegatedTeachers(delegatedTeachers)) {
+                        delegatedTeachers = {};
+                    }
+                    save();
+                    updateList();
+                    updateSubjectTabs();
+                    showSaveMessage();
+                    console.log('تم استيراد البيانات بنجاح');
+                } else {
+                    throw new Error('البيانات المستوردة غير صالحة');
+                }
+            } catch (error) {
+                console.error('خطأ في استيراد البيانات:', error);
+                showError('حدث خطأ أثناء استيراد البيانات: ' + error.message);
+            } finally {
+                showLoading(false);
+                event.target.value = '';
+            }
+        }
+
+        function showChart() {
+            if (!current) {
+                showError('يرجى اختيار طالب أولاً');
+                return;
+            }
+
+            const labels = [];
+            const masteredData = [];
+            const notMasteredData = [];
+
+            Object.keys(skills).forEach(subject => {
+                const displayName = sanitizeInput(subjectNames[subject] || subject);
+                let mastered = 0, notMastered = 0;
+                skills[subject].forEach(skill => {
+                    const status = data[current][subject][skill];
+                    if (status === 'mastered') mastered++;
+                    else if (status === 'not_mastered') notMastered++;
+                });
+                labels.push(displayName);
+                masteredData.push(mastered);
+                notMasteredData.push(notMastered);
+            });
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const ctx = document.createElement('canvas');
+            document.getElementById('content').innerHTML = `<div class="chart-container">${ctx.outerHTML}</div>`;
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
                 data: {
-                    labels,
-                    datasets: [{
-                        label: studentEvals.some(eval => eval.evalType === 'mastery') ? 'نسبة الإتقان (%)' : 'متوسط الدرجات',
-                        data,
-                        backgroundColor: '#3498db',
-                        borderColor: '#2980b9',
-                        borderWidth: 1
-                    }]
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'أتقن',
+                            data: masteredData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'لم يتقن',
+                            data: notMasteredData,
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 1
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 100,
-                            title: { display: true, text: studentEvals.some(eval => eval.evalType === 'mastery') ? 'نسبة الإتقان' : 'الدرجة' }
+                            title: { display: true, text: 'عدد المهارات' }
                         },
-                        x: { title: { display: true, text: 'المهارات' } }
+                        x: {
+                            title: { display: true, text: 'المواد' }
+                        }
                     },
                     plugins: {
-                        legend: { display: true, position: 'top' },
-                        title: { display: true, text: 'تقدم الطالب' }
+                        legend: { position: 'top' },
+                        title: { display: true, text: `تقدم ${sanitizeInput(data[current].name)}` }
                     }
                 }
             });
-            updateEvaluationsTable();
         }
 
-        // Update evaluations table
-        function updateEvaluationsTable() {
-            const subjectId = document.getElementById('subjectProgressSelect').value;
-            const studentId = document.getElementById('studentProgressSelect').value;
-            const tableBody = document.querySelector('#evaluationsTable tbody');
-            tableBody.innerHTML = '';
-            const studentEvals = evaluations.filter(eval => eval.subjectId === subjectId && eval.studentId === studentId);
-            studentEvals.forEach(eval => {
-                const row = document.createElement('tr');
-                const skillsText = Object.entries(eval.scores).map(([skillId, score]) => {
-                    const skill = skills.find(s => s.id === skillId);
-                    return `${skill.name}: ${eval.evalType === 'numeric' ? score : score === 'mastered' ? 'أتقن' : 'لم يتقن'}`;
-                }).join(', ');
-                row.innerHTML = `
-                    <td>${eval.timestamp}</td>
-                    <td>${skillsText}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        // Generate PDF report
-        async function generatePDF() {
-            const loading = document.getElementById('loading');
-            loading.style.display = 'flex';
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const subjectId = document.getElementById('subjectProgressSelect').value;
-            const studentId = document.getElementById('studentProgressSelect').value;
-            if (!subjectId || !studentId) {
-                showAlert('يرجى اختيار المادة والطالب', 'danger');
-                loading.style.display = 'none';
+        function generateReport() {
+            if (!current) {
+                showError('يرجى اختيار طالب أولاً');
                 return;
             }
-            const subject = subjects.find(s => s.id === subjectId);
-            const student = students.find(s => s.id === studentId);
-            const studentEvals = evaluations.filter(eval => eval.subjectId === subjectId && eval.studentId === studentId);
-            const subjectSkills = skills.filter(skill => skill.subjectId === subjectId);
-            const subjectPreps = preparations.filter(prep => prep.subjectId === subjectId);
 
-            // PDF Header
-            doc.setFont('Amiri', 'normal');
-            doc.setFontSize(16);
-            doc.setTextColor(40, 116, 166);
-            doc.text('تقرير تقدم الطالب', 105, 15, { align: 'center' });
-            doc.setFontSize(12);
-            doc.setTextColor(0);
-            doc.text(`الطالب: ${student.name}`, 190, 25, { align: 'right' });
-            doc.text(`المادة: ${subject.name}`, 190, 35, { align: 'right' });
-            doc.text(`التاريخ: ${new Date().toLocaleString('ar-EG')}`, 190, 45, { align: 'right' });
-
-            // Skills Table
-            let y = 55;
-            if (subjectSkills.length > 0) {
-                doc.text('المهارات ومتوسط الدرجات:', 190, y, { align: 'right' });
-                y += 10;
-                doc.setFillColor(230, 230, 230);
-                doc.rect(10, y - 5, 190, 8, 'F');
-                doc.text('المهارة', 150, y, { align: 'right' });
-                doc.text(studentEvals.some(eval => eval.evalType === 'mastery') ? 'الإتقان' : 'متوسط الدرجة', 30, y);
-                y += 10;
-                doc.setLineWidth(0.2);
-                doc.line(10, y - 5, 200, y - 5);
-                subjectSkills.forEach(skill => {
-                    const scores = studentEvals.map(eval => eval.scores[skill.id] || (eval.evalType === 'mastery' ? 'not_mastered' : 0));
-                    let avg;
-                    if (studentEvals.some(eval => eval.evalType === 'mastery')) {
-                        const masteredCount = scores.filter(score => score === 'mastered').length;
-                        avg = scores.length ? `${(masteredCount / scores.length * 100).toFixed(2)}% أتقن` : '0% أتقن';
-                    } else {
-                        avg = scores.length ? (scores.reduce((sum, score) => sum + (typeof score === 'number' ? score : 0), 0) / scores.length).toFixed(2) : 0;
-                    }
-                    doc.text(skill.name, 190, y, { align: 'right' });
-                    doc.text(`${avg}`, 30, y);
-                    y += 10;
-                    doc.line(10, y - 5, 200, y - 5);
+            let html = `<h3>تقرير تقدم الطالب: ${sanitizeInput(data[current].name)}</h3>`;
+            Object.keys(skills).forEach(subject => {
+                const displayName = sanitizeInput(subjectNames[subject] || subject);
+                html += `<h4>${displayName}</h4><ul>`;
+                skills[subject].forEach(skill => {
+                    const status = data[current][subject][skill];
+                    const statusText = status === 'mastered' ? 'أتقن' : status === 'not_mastered' ? 'لم يتقن' : 'غير مقيّم';
+                    const statusClass = status === 'mastered' ? 'mastered' : status === 'not_mastered' ? 'not-mastered' : '';
+                    html += `<li><span class="${statusClass}">${sanitizeInput(skill)}: ${statusText}</span></li>`;
                 });
-            }
+                html += '</ul>';
+            });
 
-            // Preparations
-            if (subjectPreps.length > 0) {
-                y += 10;
-                doc.text('خطط التحضير:', 190, y, { align: 'right' });
-                y += 10;
-                subjectPreps.forEach(prep => {
-                    doc.text(`- ${prep.topic}: ${prep.notes || 'لا توجد ملاحظات'} (${prep.timestamp})`, 190, y, { align: 'right' });
-                    y += 10;
-                });
-            }
-
-            // Add Chart
-            if (chart && subjectSkills.length > 0) {
-                y += 10;
-                doc.text('رسم بياني للتقدم:', 190, y, { align: 'right' });
-                const canvas = document.getElementById('progressChart');
-                const chartImage = await html2canvas(canvas, { scale: 2 });
-                const imgData = chartImage.toDataURL('image/png');
-                doc.addImage(imgData, 'PNG', 10, y + 5, 190, 80);
-            }
-
-            // Save PDF
-            doc.save(`${student.name}_تقرير_تقدم_${subject.name}.pdf`);
-            showAlert('تم إنشاء التقرير بنجاح');
-            loading.style.display = 'none';
+            const reportWindow = window.open('', '_blank');
+            reportWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="ar" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>تقرير ${sanitizeInput(data[current].name)}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h3 { color: #4f46e5; }
+                        h4 { color: #7c3aed; margin-top: 20px; }
+                        ul { list-style: none; padding: 0; }
+                        li { margin: 10px 0; }
+                        .mastered { color: #10b981; }
+                        .not-mastered { color: #dc2626; }
+                    </style>
+                </head>
+                <body>
+                    ${html}
+                </body>
+                </html>
+            `);
+            reportWindow.document.close();
         }
 
-        // Clear all data
-        function clearData() {
-            if (confirm('هل أنت متأكد من مسح جميع البيانات؟ هذا الإجراء لا يمكن التراجع عنه!')) {
-                subjects = [];
-                students = [];
-                skills = [];
-                evaluations = [];
-                preparations = [];
-                localStorage.removeItem('subjects');
-                localStorage.removeItem('students');
-                localStorage.removeItem('skills');
-                localStorage.removeItem('evaluations');
-                localStorage.removeItem('preparations');
-                updateAllSelects();
-                updateEvaluationsTable();
-                if (chart) chart.destroy();
-                chart = null;
-                showAlert('تم مسح جميع البيانات بنجاح', 'success');
-            }
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', document.body.dataset.theme);
         }
 
-        // Event listeners
-        document.getElementById('subjectEvalSelect').addEventListener('change', updateStudentSelect);
-        document.getElementById('subjectProgressSelect').addEventListener('change', updateStudentSelect);
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.dataset.theme = savedTheme;
+            load();
+        });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
