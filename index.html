@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.1/purify.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
     <style>
         :root {
             --primary: #4f46e5;
@@ -302,6 +303,13 @@
             padding: 20px;
             background: rgba(248, 250, 252, 0.5);
             border-radius: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-container canvas {
+            animation: fadeIn 0.5s ease;
         }
         
         .welcome-message {
@@ -417,13 +425,17 @@
             background: #e5e7eb;
         }
 
-        .no-subjects-message {
+        .no-subjects-message, .no-data-message {
             text-align: center;
             padding: 40px;
             background: linear-gradient(135deg, #fef3c7, #fde68a);
             border-radius: 15px;
             border: 2px dashed #f59e0b;
             margin: 20px 0;
+        }
+
+        [data-theme="dark"] .chart-container {
+            background: rgba(31, 41, 55, 0.5);
         }
 
         @media (max-width: 768px) {
@@ -434,6 +446,8 @@
             .theme-toggle { top: 10px; left: 10px; }
             .student-image { width: 40px; height: 40px; }
             .student-details-image { width: 80px; height: 80px; }
+            .chart-container { grid-template-columns: 1fr; }
+            .chart-container canvas { max-height: 300px; }
         }
 
         @keyframes fadeIn {
@@ -452,6 +466,60 @@
             height: 30px;
             animation: spin 1s linear infinite;
             margin: 0 auto;
+        }
+
+        /* Report-specific styles */
+        .report-container {
+            font-family: 'Noto Naskh Arabic', Arial, sans-serif;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .report-container h1 {
+            font-size: 2rem;
+            color: var(--primary);
+            text-align: center;
+        }
+        .report-container h3 {
+            font-size: 1.5rem;
+            margin: 20px 0 10px;
+        }
+        .report-container h4 {
+            font-size: 1.2rem;
+            margin: 15px 0 10px;
+        }
+        .report-container p {
+            font-size: 1rem;
+            color: #333;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .report-table th, .report-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: right;
+        }
+        .report-table th {
+            background: var(--primary);
+            color: white;
+        }
+        .report-table .mastered {
+            color: var(--success);
+            font-weight: bold;
+        }
+        .report-table .not-mastered {
+            color: var(--danger);
+            font-weight: bold;
+        }
+        .report-footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #666;
         }
     </style>
 </head>
@@ -828,7 +896,7 @@
                 localStorage.setItem('currentUser', encryptData(currentUser));
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'grid';
-                document.getElementById('loginUserName').value = ''; // إعادة تعيين حقل الإدخال
+                document.getElementById('loginUserName').value = '';
                 await load();
                 restrictUIByPermission();
             } catch (error) {
@@ -883,9 +951,9 @@
         }
 
         function validateImage(file) {
-            const maxSize = 1 * 1024 * 1024; // 1MB
+            const maxSize = 1 * 1024 * 1024;
             const allowedTypes = ['image/jpeg', 'image/png'];
-            if (!file) return true; // Image is optional
+            if (!file) return true;
             if (!allowedTypes.includes(file.type)) {
                 showError('يرجى تحميل صورة بصيغة JPEG أو PNG');
                 return false;
@@ -1592,27 +1660,48 @@
             }
         }
 
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            html.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+            document.querySelector('.theme-toggle').textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+        }
+
         function showChart() {
             if (!current) {
                 showError('يرجى اختيار طالب أولاً');
                 return;
             }
 
+            if (Object.keys(skills).length === 0) {
+                document.getElementById('content').innerHTML = `
+                    <div class="no-data-message">
+                        <h3>لا توجد بيانات متاحة</h3>
+                        <p>يرجى إضافة مواد ومهارات لعرض الرسم البياني</p>
+                    </div>
+                `;
+                return;
+            }
+
             const labels = [];
             const masteredData = [];
             const notMasteredData = [];
+            const totalProgressData = [];
 
             Object.keys(skills).forEach(subject => {
                 const displayName = sanitizeInput(subjectNames[subject] || subject);
-                let mastered = 0, notMastered = 0;
+                let mastered = 0, notMastered = 0, total = 0;
                 skills[subject].forEach(skill => {
+                    total++;
                     const status = data[current][subject][skill];
                     if (status === 'mastered') mastered++;
                     else if (status === 'not_mastered') notMastered++;
                 });
+                const progress = total > 0 ? (mastered / total * 100) : 0;
                 labels.push(displayName);
                 masteredData.push(mastered);
                 notMasteredData.push(notMastered);
+                totalProgressData.push(progress);
             });
 
             if (chartInstance) {
@@ -1620,7 +1709,13 @@
             }
 
             const ctx = document.createElement('canvas');
-            document.getElementById('content').innerHTML = `<div class="chart-container">${ctx.outerHTML}</div>`;
+            const ctxDoughnut = document.createElement('canvas');
+            document.getElementById('content').innerHTML = `
+                <div class="chart-container">
+                    <div>${ctx.outerHTML}</div>
+                    <div>${ctxDoughnut.outerHTML}</div>
+                </div>
+            `;
 
             chartInstance = new Chart(ctx, {
                 type: 'bar',
@@ -1649,74 +1744,271 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: { display: true, text: 'عدد المهارات' }
+                            title: { display: true, text: 'عدد المهارات', font: { size: 14 } },
+                            ticks: { stepSize: 1 }
                         },
                         x: {
-                            title: { display: true, text: 'المواد' }
+                            title: { display: true, text: 'المواد', font: { size: 14 } }
                         }
                     },
                     plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: `تقدم ${sanitizeInput(data[current].name)}` }
+                        legend: { position: 'top', labels: { font: { size: 12 } } },
+                        title: { display: true, text: `تقدم ${sanitizeInput(data[current].name)} في المهارات`, font: { size: 16 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y;
+                                    return `${label}: ${value} مهارة`;
+                                }
+                            }
+                        }
                     }
                 }
             });
+
+            new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'نسبة الإتقان',
+                        data: totalProgressData,
+                        backgroundColor: labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`),
+                        borderColor: labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 40%)`),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { size: 12 } } },
+                        title: { display: true, text: '
+                            <script>
+    // ... (previous code remains unchanged up to the incomplete showChart function)
+
+    function showChart() {
+        if (!current) {
+            showError('يرجى اختيار طالب أولاً');
+            return;
         }
 
-        function generateReport() {
-            if (!current) {
-                showError('يرجى اختيار طالب أولاً');
-                return;
-            }
+        if (Object.keys(skills).length === 0) {
+            document.getElementById('content').innerHTML = `
+                <div class="no-data-message">
+                    <h3>لا توجد بيانات متاحة</h3>
+                    <p>يرجى إضافة مواد ومهارات لعرض الرسم البياني</p>
+                </div>
+            `;
+            return;
+        }
 
-            let html = `<h3>تقرير تقدم الطالب: ${sanitizeInput(data[current].name)}</h3>`;
+        const labels = [];
+        const masteredData = [];
+        const notMasteredData = [];
+        const totalProgressData = [];
+
+        Object.keys(skills).forEach(subject => {
+            const displayName = sanitizeInput(subjectNames[subject] || subject);
+            let mastered = 0, notMastered = 0, total = 0;
+            skills[subject].forEach(skill => {
+                total++;
+                const status = data[current][subject][skill];
+                if (status === 'mastered') mastered++;
+                else if (status === 'not_mastered') notMastered++;
+            });
+            const progress = total > 0 ? (mastered / total * 100) : 0;
+            labels.push(displayName);
+            masteredData.push(mastered);
+            notMasteredData.push(notMastered);
+            totalProgressData.push(progress);
+        });
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        const ctx = document.createElement('canvas');
+        const ctxDoughnut = document.createElement('canvas');
+        document.getElementById('content').innerHTML = `
+            <div class="chart-container">
+                <div>${ctx.outerHTML}</div>
+                <div>${ctxDoughnut.outerHTML}</div>
+            </div>
+        `;
+
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'أتقن',
+                        data: masteredData,
+                        backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'لم يتقن',
+                        data: notMasteredData,
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'عدد المهارات', font: { size: 14 } },
+                        ticks: { stepSize: 1 }
+                    },
+                    x: {
+                        title: { display: true, text: 'المواد', font: { size: 14 } }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top', labels: { font: { size: 12 } } },
+                    title: { display: true, text: `تقدم ${sanitizeInput(data[current].name)} في المهارات`, font: { size: 16 } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                const value = context.parsed.y;
+                                return `${label}: ${value} مهارة`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        new Chart(ctxDoughnut, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'نسبة الإتقان',
+                    data: totalProgressData,
+                    backgroundColor: labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`),
+                    borderColor: labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 40%)`),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { size: 12 } } },
+                    title: { display: true, text: `نسبة الإتقان لـ ${sanitizeInput(data[current].name)}`, font: { size: 16 } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                return `${label}: ${value.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function generateReport() {
+        if (!current) {
+            showError('يرجى اختيار طالب أولاً');
+            return;
+        }
+
+        if (Object.keys(skills).length === 0) {
+            showError('لا توجد بيانات متاحة لإنشاء التقرير');
+            return;
+        }
+
+        showLoading(true);
+        try {
+            let reportHtml = `
+                <div class="report-container">
+                    <h1>تقرير تقدم الطالب: ${sanitizeInput(data[current].name)}</h1>
+                    <p>تاريخ التقرير: ${new Date().toLocaleDateString('ar-SA')}</p>
+                    <p>المعلم/ة: ${sanitizeInput(document.getElementById('teacherName').value || 'غير محدد')}</p>
+            `;
+
             Object.keys(skills).forEach(subject => {
                 const displayName = sanitizeInput(subjectNames[subject] || subject);
-                html += `<h4>${displayName}</h4><ul>`;
+                reportHtml += `
+                    <h3>${displayName}</h3>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>المهارة</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
                 skills[subject].forEach(skill => {
-                    const status = data[current][subject][skill];
-                    const statusText = status === 'mastered' ? 'أتقن' : status === 'not_mastered' ? 'لم يتقن' : 'غير مقيّم';
+                    const status = data[current][subject][skill] || 'not_assessed';
+                    const statusText = status === 'mastered' ? 'أتقن' : status === 'not_mastered' ? 'لم يتقن' : 'لم يتم التقييم';
                     const statusClass = status === 'mastered' ? 'mastered' : status === 'not_mastered' ? 'not-mastered' : '';
-                    html += `<li><span class="${statusClass}">${sanitizeInput(skill)}: ${statusText}</span></li>`;
+                    reportHtml += `
+                        <tr>
+                            <td>${sanitizeInput(skill)}</td>
+                            <td class="${statusClass}">${statusText}</td>
+                        </tr>
+                    `;
                 });
-                html += '</ul>';
+
+                let mastered = 0, total = skills[subject].length;
+                skills[subject].forEach(skill => {
+                    if (data[current][subject][skill] === 'mastered') mastered++;
+                });
+                const progress = total > 0 ? (mastered / total * 100).toFixed(1) : 0;
+                reportHtml += `
+                        </tbody>
+                    </table>
+                    <p>نسبة الإتقان: ${progress}%</p>
+                `;
             });
 
-            const reportWindow = window.open('', '_blank');
-            reportWindow.document.write(`
-                <!DOCTYPE html>
-                <html lang="ar" dir="rtl">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>تقرير ${sanitizeInput(data[current].name)}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; }
-                        h3 { color: #4f46e5; }
-                        h4 { color: #7c3aed; margin-top: 20px; }
-                        ul { list-style: none; padding: 0; }
-                        li { margin: 10px 0; }
-                        .mastered { color: #10b981; }
-                        .not-mastered { color: #dc2626; }
-                    </style>
-                </head>
-                <body>
-                    ${html}
-                </body>
-                </html>
-            `);
-            reportWindow.document.close();
-        }
+            reportHtml += `
+                    <div class="report-footer">
+                        <p>تم إنشاء هذا التقرير بواسطة نظام متابعة طلاب الصف الأول الابتدائي - مدارس البشرى الأهلية</p>
+                    </div>
+                </div>
+            `;
 
-        function toggleTheme() {
-            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('theme', document.body.dataset.theme);
-        }
+            const element = document.createElement('div');
+            element.innerHTML = reportHtml;
+            document.body.appendChild(element);
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.body.dataset.theme = savedTheme;
-            load();
-        });
-    </script>
-</body>
-</html>
+            const options = {
+                margin: 10,
+                filename: `تقرير_${sanitizeInput(data[current].name)}_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(options).from(element).save().then(() => {
+                document.body.removeChild(element);
+                showSaveMessage();
+            });
+        } catch (error) {
+            console.error('خطأ في إنشاء التقرير:', error);
+            showError('حدث خطأ أثناء إنشاء التقرير: ' + error.message);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // Initialize the application
+    load();
+</script>
